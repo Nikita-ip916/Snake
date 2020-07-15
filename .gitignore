@@ -1,0 +1,7 @@
+*.txt
+*.md
+*.o
+*~
+*.exe
+bin/*
+build/test/*.cpp
