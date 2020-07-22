@@ -1,4 +1,5 @@
-#include <SFML/Graphics.hpp>
+#include "SFML/Graphics.hpp"
+#include "player.hpp"
 #include <iostream>
 #include <math.h>
 #include <sstream>
@@ -11,6 +12,9 @@ using namespace sf;
 
 int main()
 {
+    setlocale(LC_ALL, "Russian");
+    SetConsoleOutputCP(1251);
+    SetConsoleCP(1251);
     RenderWindow window(VideoMode(1920, 1080), "Snake 2020", Style::Fullscreen);
     view.reset(FloatRect(0, 0, 1920, 1080));
 
@@ -23,6 +27,8 @@ int main()
 
     Image heroImage;
     heroImage.loadFromFile("images/Tiles.png");
+
+    Player p1(heroImage, "Player1", 320, 320, 32, 32);
 
     Clock clock;
     while (window.isOpen()) {
