@@ -6,8 +6,8 @@ using namespace sf;
 #ifndef MAP_HPP
 #define MAP_HPP
 
-const int HEIGHT_MAP = 25;
-const int WIDTH_MAP = 40;
+const int HEIGHT_MAP = 32;
+const int WIDTH_MAP = 32;
 
 String TileMap[HEIGHT_MAP] = {
         "00000000000000000000000000000000", "0                              0",
@@ -28,7 +28,7 @@ String TileMap[HEIGHT_MAP] = {
         "0                              0", "00000000000000000000000000000000",
 };
 
-void randomMapGenerate(String bonus)
+void randomMapGenerate(char bonus)
 {
     int randomElementX = 0;
     int randomElementY = 0;
@@ -43,3 +43,4 @@ void randomMapGenerate(String bonus)
         }
     }
 }
+#endif

@@ -5,7 +5,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <vector>
-#include <windows.h>
 
 using namespace std;
 using namespace sf;
@@ -16,11 +15,12 @@ class Player {
 public:
     struct Tile {
         string name;
-        enum { left, right, up, down } state;
+        enum state { left, right, up, down };
         int x;
         int y;
-    } tile;
-    vector<tile> body;
+    };
+    Tile tile;
+    vector<Tile> body;
     float x, y, dx, dy, speed, moveTimer;
     int w, h, size, score;
     bool life;
@@ -52,5 +52,5 @@ public:
             sprite.setColor(Color::Red);
         }
     }
-}
+};
 #endif
