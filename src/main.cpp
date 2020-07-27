@@ -38,5 +38,6 @@ int main()
                 window.close();
             }
         }
-        return 0;
     }
+    return 0;
+}
