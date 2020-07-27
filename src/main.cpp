@@ -1,6 +1,6 @@
 #include "SFML/Graphics.hpp"
 #include "map.hpp"
-//#include "player.hpp"
+#include "player.hpp"
 #include <iostream>
 #include <math.h>
 #include <sstream>
@@ -28,7 +28,7 @@ int main()
     Image heroImage;
     heroImage.loadFromFile("images/Tiles.png");
 
-    // Player p1(heroImage, "Player1", 320, 320, 32, 32);
+    Player p1(heroImage, "Player1", 32, 32, 32, 32);
 
     Clock clock;
     while (window.isOpen()) {
@@ -58,6 +58,17 @@ int main()
                 map.setPosition(j * 32, i * 32);
                 window.draw(map);
             }
+        }
+        for (unsigned int i = 0; i < p1.body.size(); i++) {
+            if (p1.body[i].name == "Head") {
+                p1.sprite.setTextureRect(IntRect(0, 0, 32, 32));
+            } else if (p1.body[i].name == "Body") {
+                p1.sprite.setTextureRect(IntRect(32, 0, 32, 32));
+            } else if (p1.body[i].name == "Tail") {
+                p1.sprite.setTextureRect(IntRect(128, 0, 32, 32));
+            }
+            p1.sprite.setPosition(p1.body[i].x, p1.body[i].y);
+            window.draw(p1.sprite);
         }
         if (Keyboard::isKeyPressed(Keyboard::Escape)) {
             window.close();
