@@ -19,16 +19,16 @@ int main()
     // view.reset(FloatRect(0, 0, 640, 480));
 
     Image mapImage;
-    mapImage.loadFromFile("images/Tiles.png");
+    mapImage.loadFromFile("images/tiles.png");
     Texture mapTexture;
     mapTexture.loadFromImage(mapImage);
     Sprite map;
     map.setTexture(mapTexture);
 
     Image heroImage;
-    heroImage.loadFromFile("images/Tiles.png");
+    heroImage.loadFromFile("images/tiles.png");
 
-    Player p1(heroImage, "Player1", 32, 32, 32, 32);
+    Player p1(heroImage, "Player1", 256, 128, 64, 64);
 
     Clock clock;
     while (window.isOpen()) {
@@ -41,31 +41,31 @@ int main()
         for (int i = 0; i < HEIGHT_MAP; i++) {
             for (int j = 0; j < WIDTH_MAP; j++) {
                 if (TileMap[i][j] == ' ') {
-                    map.setTextureRect(IntRect(160, 0, 32, 32));
+                    map.setTextureRect(IntRect(320, 0, 64, 64));
                 }
                 if (TileMap[i][j] == 'a') {
-                    map.setTextureRect(IntRect(224, 0, 32, 32));
+                    map.setTextureRect(IntRect(448, 0, 64, 64));
                 }
                 if (TileMap[i][j] == '0') {
-                    map.setTextureRect(IntRect(192, 0, 32, 32));
+                    map.setTextureRect(IntRect(384, 0, 64, 64));
                 }
                 if (TileMap[i][j] == '+') {
-                    map.setTextureRect(IntRect(288, 0, 32, 32));
+                    map.setTextureRect(IntRect(576, 0, 64, 64));
                 }
                 if (TileMap[i][j] == '-') {
-                    map.setTextureRect(IntRect(256, 0, 32, 32));
+                    map.setTextureRect(IntRect(512, 0, 64, 64));
                 }
-                map.setPosition(j * 32, i * 32);
+                map.setPosition(j * 64, i * 64);
                 window.draw(map);
             }
         }
         for (unsigned int i = 0; i < p1.body.size(); i++) {
             if (p1.body[i].name == "Head") {
-                p1.sprite.setTextureRect(IntRect(0, 0, 32, 32));
+                p1.sprite.setTextureRect(IntRect(0, 0, 64, 64));
             } else if (p1.body[i].name == "Body") {
-                p1.sprite.setTextureRect(IntRect(32, 0, 32, 32));
+                p1.sprite.setTextureRect(IntRect(64, 0, 64, 64));
             } else if (p1.body[i].name == "Tail") {
-                p1.sprite.setTextureRect(IntRect(128, 0, 32, 32));
+                p1.sprite.setTextureRect(IntRect(256, 0, 64, 64));
             }
             p1.sprite.setPosition(p1.body[i].x, p1.body[i].y);
             window.draw(p1.sprite);
