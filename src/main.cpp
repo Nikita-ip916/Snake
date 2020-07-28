@@ -32,12 +32,17 @@ int main()
 
     Clock clock;
     while (window.isOpen()) {
+        float time = clock.getElapsedTime().asMilliseconds();
+        clock.restart();
+        time = time / 100;
         Event event;
         while (window.pollEvent(event)) {
             if (event.type == Event::Closed) {
                 window.close();
             }
         }
+        p1.update(time);
+        window.clear();
         for (int i = 0; i < HEIGHT_MAP; i++) {
             for (int j = 0; j < WIDTH_MAP; j++) {
                 if (TileMap[i][j] == ' ') {

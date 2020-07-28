@@ -42,7 +42,7 @@ public:
         tile.state = Tile::right;
         body.push_back(tile);
         score = moveTimer = 0;
-        speed = 0.5;
+        speed = 1;
         dx = dy = 0;
         life = true;
         texture.loadFromImage(image);
@@ -51,6 +51,48 @@ public:
         if (name == "Player2") {
             sprite.setColor(Color::Red);
         }
+    }
+    void control()
+    {
+        if (Keyboard::isKeyPressed(Keyboard::Left)) {
+            body[0].state = Tile::left;
+        } else if (Keyboard::isKeyPressed(Keyboard::Right)) {
+            body[0].state = Tile::right;
+        } else if (Keyboard::isKeyPressed(Keyboard::Up)) {
+            body[0].state = Tile::up;
+        } else if (Keyboard::isKeyPressed(Keyboard::Down)) {
+            body[0].state = Tile::down;
+        }
+    }
+    void update(float time)
+    {
+        control();
+        switch (body[0].state) {
+        case Tile::right:
+            dx = speed;
+            dy = 0;
+            break;
+        case Tile::left:
+            dx = -speed;
+            dy = 0;
+            break;
+        case Tile::up:
+            dy = -speed;
+            dx = 0;
+            break;
+        case Tile::down:
+            dy = speed;
+            dx = 0;
+            break;
+        }
+        body[0].x += 64 * int(dx * time);
+        // checkCollisionWithMap(dx, 0);
+        body[0].y += 64 * int(dy * time);
+        // checkCollisionWithMap(0, dy);
+        // sprite.setPosition(x + w / 2, y + h / 2);
+        /*if (life) {
+            setPlayerCoordinateForView(x, y);
+        }*/
     }
 };
 #endif
