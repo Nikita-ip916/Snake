@@ -1,3 +1,4 @@
+#include "view.hpp"
 #include <SFML/Graphics.hpp>
 #include <iostream>
 #include <math.h>
@@ -72,23 +73,34 @@ public:
         if (currentMoveDelay * speed > moveDelay) {
             switch (body[0].state) {
             case Tile::left:
+                body[1].x = body[0].x;
+                body[1].y = body[0].y;
+                body[1].state = Tile::left;
                 body[0].x -= 64;
                 break;
             case Tile::right:
+                body[1].x = body[0].x;
+                body[1].y = body[0].y;
+                body[1].state = Tile::right;
                 body[0].x += 64;
                 break;
             case Tile::up:
+                body[1].x = body[0].x;
+                body[1].y = body[0].y;
+                body[1].state = Tile::up;
                 body[0].y -= 64;
                 break;
             case Tile::down:
+                body[1].x = body[0].x;
+                body[1].y = body[0].y;
+                body[1].state = Tile::down;
                 body[0].y += 64;
                 break;
             }
             isMoved = true;
         }
-        // sprite.setPosition(x + w / 2, y + h / 2);
         if (life) {
-            setPlayerCoordinateForView(x, y);
+            setPlayerCoordinateForView(body[0].x, body[0].y);
         }
         return isMoved;
     }

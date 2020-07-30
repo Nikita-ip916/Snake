@@ -1,6 +1,7 @@
 #include "SFML/Graphics.hpp"
 #include "map.hpp"
 #include "player.hpp"
+#include "view.hpp"
 #include <iostream>
 #include <math.h>
 #include <sstream>
@@ -16,7 +17,7 @@ int main()
     // SetConsoleOutputCP(1251);
     // SetConsoleCP(1251);
     RenderWindow window(VideoMode(640, 480), "Snake 2020");
-    // view.reset(FloatRect(0, 0, 640, 480));
+    view.reset(FloatRect(0, 0, 640, 480));
 
     Image mapImage;
     mapImage.loadFromFile("images/tiles.png");
@@ -42,6 +43,7 @@ int main()
         if (p1.update(currentMoveDelay)) {
             clock.restart();
         }
+        window.setView(view);
         window.clear();
         for (int i = 0; i < HEIGHT_MAP; i++) {
             for (int j = 0; j < WIDTH_MAP; j++) {
@@ -67,24 +69,24 @@ int main()
         for (unsigned int i = 0; i < p1.body.size(); i++) {
             if (p1.body[i].name == "Head") {
                 p1.sprite.setTextureRect(IntRect(0, 0, 64, 64));
-                switch (p1.body[i].state) {
-                case Player::Tile::left:
-                    p1.sprite.setRotation(180);
-                    break;
-                case Player::Tile::right:
-                    p1.sprite.setRotation(0);
-                    break;
-                case Player::Tile::up:
-                    p1.sprite.setRotation(270);
-                    break;
-                case Player::Tile::down:
-                    p1.sprite.setRotation(90);
-                    break;
-                }
             } else if (p1.body[i].name == "Body") {
                 p1.sprite.setTextureRect(IntRect(64, 0, 64, 64));
             } else if (p1.body[i].name == "Tail") {
                 p1.sprite.setTextureRect(IntRect(256, 0, 64, 64));
+            }
+            switch (p1.body[i].state) {
+            case Player::Tile::left:
+                p1.sprite.setRotation(180);
+                break;
+            case Player::Tile::right:
+                p1.sprite.setRotation(0);
+                break;
+            case Player::Tile::up:
+                p1.sprite.setRotation(270);
+                break;
+            case Player::Tile::down:
+                p1.sprite.setRotation(90);
+                break;
             }
             p1.sprite.setPosition(
                     p1.body[i].x + p1.w / 2, p1.body[i].y + p1.h / 2);
