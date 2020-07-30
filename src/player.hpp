@@ -47,7 +47,7 @@ public:
         life = true;
         texture.loadFromImage(image);
         sprite.setTexture(texture);
-        // sprite.setOrigin(w / 2, h / 2);
+        sprite.setOrigin(w / 2, h / 2);
         if (name == "Player2") {
             sprite.setColor(Color::Red);
         }
@@ -64,35 +64,33 @@ public:
             body[0].state = Tile::down;
         }
     }
-    void update(float time)
+    bool update(float currentMoveDelay)
     {
+        bool isMoved = false;
+        float moveDelay = 700;
         control();
-        switch (body[0].state) {
-        case Tile::right:
-            dx = speed;
-            dy = 0;
-            break;
-        case Tile::left:
-            dx = -speed;
-            dy = 0;
-            break;
-        case Tile::up:
-            dy = -speed;
-            dx = 0;
-            break;
-        case Tile::down:
-            dy = speed;
-            dx = 0;
-            break;
+        if (currentMoveDelay * speed > moveDelay) {
+            switch (body[0].state) {
+            case Tile::left:
+                body[0].x -= 64;
+                break;
+            case Tile::right:
+                body[0].x += 64;
+                break;
+            case Tile::up:
+                body[0].y -= 64;
+                break;
+            case Tile::down:
+                body[0].y += 64;
+                break;
+            }
+            isMoved = true;
         }
-        body[0].x += 64 * int(dx * time);
-        // checkCollisionWithMap(dx, 0);
-        body[0].y += 64 * int(dy * time);
-        // checkCollisionWithMap(0, dy);
         // sprite.setPosition(x + w / 2, y + h / 2);
-        /*if (life) {
+        if (life) {
             setPlayerCoordinateForView(x, y);
-        }*/
+        }
+        return isMoved;
     }
 };
 #endif

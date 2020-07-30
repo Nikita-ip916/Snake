@@ -29,19 +29,19 @@ int main()
     heroImage.loadFromFile("images/tiles.png");
 
     Player p1(heroImage, "Player1", 256, 128, 64, 64);
-
     Clock clock;
+
     while (window.isOpen()) {
-        float time = clock.getElapsedTime().asMilliseconds();
-        clock.restart();
-        time = time / 100;
+        float currentMoveDelay = clock.getElapsedTime().asMilliseconds();
         Event event;
         while (window.pollEvent(event)) {
             if (event.type == Event::Closed) {
                 window.close();
             }
         }
-        p1.update(time);
+        if (p1.update(currentMoveDelay)) {
+            clock.restart();
+        }
         window.clear();
         for (int i = 0; i < HEIGHT_MAP; i++) {
             for (int j = 0; j < WIDTH_MAP; j++) {
@@ -67,13 +67,29 @@ int main()
         for (unsigned int i = 0; i < p1.body.size(); i++) {
             if (p1.body[i].name == "Head") {
                 p1.sprite.setTextureRect(IntRect(0, 0, 64, 64));
+                switch (p1.body[i].state) {
+                case Player::Tile::left:
+                    p1.sprite.setRotation(180);
+                    break;
+                case Player::Tile::right:
+                    p1.sprite.setRotation(0);
+                    break;
+                case Player::Tile::up:
+                    p1.sprite.setRotation(270);
+                    break;
+                case Player::Tile::down:
+                    p1.sprite.setRotation(90);
+                    break;
+                }
             } else if (p1.body[i].name == "Body") {
                 p1.sprite.setTextureRect(IntRect(64, 0, 64, 64));
             } else if (p1.body[i].name == "Tail") {
                 p1.sprite.setTextureRect(IntRect(256, 0, 64, 64));
             }
-            p1.sprite.setPosition(p1.body[i].x, p1.body[i].y);
+            p1.sprite.setPosition(
+                    p1.body[i].x + p1.w / 2, p1.body[i].y + p1.h / 2);
             window.draw(p1.sprite);
+            p1.sprite.setRotation(0);
         }
         if (Keyboard::isKeyPressed(Keyboard::Escape)) {
             window.close();
