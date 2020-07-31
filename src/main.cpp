@@ -41,6 +41,8 @@ int main()
             }
         }
         if (p1.update(currentMoveDelay)) {
+            randomMapGenerate('+');
+            randomMapGenerate('-');
             clock.restart();
         }
         window.setView(view);

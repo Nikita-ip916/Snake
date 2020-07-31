@@ -9,10 +9,14 @@ void setPlayerCoordinateForView(float x, float y)
     float tempX = x;
     float tempY = y;
 
-    /*if (x < 272) tempX = 272;
-    if (x > 912) tempX = 912;
-    if (y < 192) tempY = 192;
-    if (y > 624) tempY = 624;*/
+    if (x < 320)
+        tempX = 320;
+    if (x > 1728)
+        tempX = 1728;
+    if (y < 240)
+        tempY = 240;
+    if (y > 1808)
+        tempY = 1808;
 
     view.setCenter(tempX, tempY);
 }
