@@ -22,9 +22,9 @@ public:
     };
     vector<Tile> body;
     Tile tile;
-    float x, y, dx, dy, speed, moveTimer;
-    int w, h, size, score;
-    bool life;
+    float x, y, dx, dy, speed;
+    int w, h, score;
+    bool life, bonusTimer;
     Texture texture;
     Sprite sprite;
     string name;
@@ -42,9 +42,10 @@ public:
         tile.name = "Tail";
         tile.state = Tile::right;
         body.push_back(tile);
-        score = moveTimer = 0;
+        score = 0;
         speed = 1;
         dx = dy = 0;
+        bonusTimer = false;
         life = true;
         image.createMaskFromColor(Color(255, 255, 255));
         texture.loadFromImage(image);
@@ -56,13 +57,20 @@ public:
     }
     void control()
     {
-        if (Keyboard::isKeyPressed(Keyboard::Left)) {
+        if (Keyboard::isKeyPressed(Keyboard::Left)
+            && body[1].state != Tile::right) {
             body[0].state = Tile::left;
-        } else if (Keyboard::isKeyPressed(Keyboard::Right)) {
+        } else if (
+                Keyboard::isKeyPressed(Keyboard::Right)
+                && body[1].state != Tile::left) {
             body[0].state = Tile::right;
-        } else if (Keyboard::isKeyPressed(Keyboard::Up)) {
+        } else if (
+                Keyboard::isKeyPressed(Keyboard::Up)
+                && body[1].state != Tile::down) {
             body[0].state = Tile::up;
-        } else if (Keyboard::isKeyPressed(Keyboard::Down)) {
+        } else if (
+                Keyboard::isKeyPressed(Keyboard::Down)
+                && body[1].state != Tile::up) {
             body[0].state = Tile::down;
         }
     }
@@ -73,13 +81,21 @@ public:
                 if (TileMap[i][j] == '0') {
                     life = false;
                 } else if (TileMap[i][j] == '+') {
-                    speed *= 2;
-                    // bonusTimer = true;
+                    speed = 2;
+                    bonusTimer = true;
                     TileMap[i][j] = ' ';
+                    randomMapGenerate('+');
                 } else if (TileMap[i][j] == '-') {
-                    speed *= 0.5;
+                    speed = 0.5;
+                    bonusTimer = true;
                     TileMap[i][j] = ' ';
+                    randomMapGenerate('-');
+                } else if (TileMap[i][j] == 'a') {
+                    score++;
+                    TileMap[i][j] = ' ';
+                    randomMapGenerate('a');
                 }
+                cout << speed << endl;
             }
         }
     }

@@ -2,6 +2,7 @@
 #include "map.hpp"
 #include "player.hpp"
 #include "view.hpp"
+#include <iomanip>
 #include <iostream>
 #include <math.h>
 #include <sstream>
@@ -16,8 +17,9 @@ int main()
     // setlocale(LC_ALL, "Russian");
     // SetConsoleOutputCP(1251);
     // SetConsoleCP(1251);
-    RenderWindow window(VideoMode(640, 480), "Snake 2020");
-    view.reset(FloatRect(0, 0, 640, 480));
+    const int defaultTextSize = 50;
+    RenderWindow window(VideoMode(1920, 1080), "Snake 2020", Style::Fullscreen);
+    view.reset(FloatRect(0, 0, 1920, 1080));
 
     Image mapImage;
     mapImage.loadFromFile("images/tiles.png");
@@ -28,12 +30,23 @@ int main()
 
     Image heroImage;
     heroImage.loadFromFile("images/tiles.png");
+    Font font;
+    font.loadFromFile("images/PostModern.ttf");
+    Text bonusText("", font, defaultTextSize);
 
     Player p1(heroImage, "Player1", 256, 128, 64, 64);
-    Clock clock;
+
+    Clock clockMove, clockBonus;
+    bool bonusClock = false;
+
+    randomMapGenerate('+');
+    randomMapGenerate('-');
+    randomMapGenerate('a');
 
     while (window.isOpen()) {
-        float currentMoveDelay = clock.getElapsedTime().asMilliseconds();
+        ostringstream bonus;
+        float currentMoveDelay = clockMove.getElapsedTime().asMilliseconds();
+        int bonusTime, currentBonusTime;
         Event event;
         while (window.pollEvent(event)) {
             if (event.type == Event::Closed) {
@@ -41,9 +54,26 @@ int main()
             }
         }
         if (p1.update(currentMoveDelay)) {
-            randomMapGenerate('+');
-            randomMapGenerate('-');
-            clock.restart();
+            clockMove.restart();
+        }
+        if (p1.bonusTimer) {
+            bonusTime = 10;
+            bonusClock = true;
+            clockBonus.restart();
+            p1.bonusTimer = false;
+        }
+        if (bonusClock) {
+            currentBonusTime = clockBonus.getElapsedTime().asSeconds();
+        } else {
+            bonusTime = 0;
+        }
+        if (bonusTime > 0) {
+            bonus << setfill('0') << setw(2) << 10 - currentBonusTime;
+        }
+        if (currentBonusTime >= bonusTime) {
+            p1.speed = 1;
+            bonusTime = 0;
+            bonusClock = false;
         }
         window.setView(view);
         window.clear();
@@ -97,6 +127,13 @@ int main()
         }
         if (Keyboard::isKeyPressed(Keyboard::Escape)) {
             window.close();
+        }
+        if (p1.life) {
+            bonusText.setString(bonus.str());
+            bonus.str("");
+            bonusText.setPosition(
+                    view.getCenter().x - 896, view.getCenter().y - 476);
+            window.draw(bonusText);
         }
         window.display();
     }
