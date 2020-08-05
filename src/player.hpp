@@ -58,24 +58,25 @@ public:
     void control()
     {
         if (Keyboard::isKeyPressed(Keyboard::Left)
-            && body[1].state != Tile::right) {
+            && body[body.size() - 1].state != Tile::right) {
             body[0].state = Tile::left;
         } else if (
                 Keyboard::isKeyPressed(Keyboard::Right)
-                && body[1].state != Tile::left) {
+                && body[body.size() - 1].state != Tile::left) {
             body[0].state = Tile::right;
         } else if (
                 Keyboard::isKeyPressed(Keyboard::Up)
-                && body[1].state != Tile::down) {
+                && body[body.size() - 1].state != Tile::down) {
             body[0].state = Tile::up;
         } else if (
                 Keyboard::isKeyPressed(Keyboard::Down)
-                && body[1].state != Tile::up) {
+                && body[body.size() - 1].state != Tile::up) {
             body[0].state = Tile::down;
         }
     }
-    void checkCollisionWithMap()
+    bool checkCollisionWithMap()
     {
+        bool eaten = false;
         for (int i = body[0].y / 64; i < (body[0].y + h) / 64; i++) {
             for (int j = body[0].x / 64; j < (body[0].x + w) / 64; j++) {
                 if (TileMap[i][j] == '0') {
@@ -93,11 +94,13 @@ public:
                 } else if (TileMap[i][j] == 'a') {
                     score++;
                     TileMap[i][j] = ' ';
+                    growth();
+                    eaten = true;
                     randomMapGenerate('a');
                 }
-                cout << speed << endl;
             }
         }
+        return eaten;
     }
     bool update(float currentMoveDelay)
     {
@@ -106,33 +109,39 @@ public:
         if (life) {
             control();
             if (currentMoveDelay * speed > moveDelay) {
+                if (!checkCollisionWithMap()) {
+                    for (unsigned int i = 1; i < body.size() - 1; i++) {
+                        body[i].x = body[i + 1].x;
+                        body[i].y = body[i + 1].y;
+                        body[i].state = body[i + 1].state;
+                    }
+                }
                 switch (body[0].state) {
                 case Tile::left:
-                    body[1].x = body[0].x;
-                    body[1].y = body[0].y;
-                    body[1].state = Tile::left;
+                    body[body.size() - 1].x = body[0].x;
+                    body[body.size() - 1].y = body[0].y;
+                    body[body.size() - 1].state = Tile::left;
                     body[0].x -= 64;
                     break;
                 case Tile::right:
-                    body[1].x = body[0].x;
-                    body[1].y = body[0].y;
-                    body[1].state = Tile::right;
+                    body[body.size() - 1].x = body[0].x;
+                    body[body.size() - 1].y = body[0].y;
+                    body[body.size() - 1].state = Tile::right;
                     body[0].x += 64;
                     break;
                 case Tile::up:
-                    body[1].x = body[0].x;
-                    body[1].y = body[0].y;
-                    body[1].state = Tile::up;
+                    body[body.size() - 1].x = body[0].x;
+                    body[body.size() - 1].y = body[0].y;
+                    body[body.size() - 1].state = Tile::up;
                     body[0].y -= 64;
                     break;
                 case Tile::down:
-                    body[1].x = body[0].x;
-                    body[1].y = body[0].y;
-                    body[1].state = Tile::down;
+                    body[body.size() - 1].x = body[0].x;
+                    body[body.size() - 1].y = body[0].y;
+                    body[body.size() - 1].state = Tile::down;
                     body[0].y += 64;
                     break;
                 }
-                checkCollisionWithMap();
                 isMoved = true;
             }
             setPlayerCoordinateForView(body[0].x, body[0].y);
@@ -140,6 +149,14 @@ public:
             sprite.setColor(Color::Red);
         }
         return isMoved;
+    }
+    void growth()
+    {
+        tile.name = "Body";
+        tile.x = body[0].x;
+        tile.y = body[0].y;
+        tile.state = body[0].state;
+        body.push_back(tile);
     }
 };
 #endif
