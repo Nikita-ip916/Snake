@@ -4,19 +4,19 @@
 #include "view.hpp"
 #include <iomanip>
 #include <iostream>
+//#include <locale>
 #include <math.h>
 #include <sstream>
 #include <stdio.h>
 #include <stdlib.h>
+//#include <string>
 
 using namespace std;
 using namespace sf;
 
 int main()
 {
-    // setlocale(LC_ALL, "Russian");
-    // SetConsoleOutputCP(1251);
-    // SetConsoleCP(1251);
+    // setlocale(LC_CTYPE, "rus");
     const int defaultTextSize = 50;
     RenderWindow window(VideoMode(1920, 1080), "Snake 2020", Style::Fullscreen);
     view.reset(FloatRect(0, 0, 1920, 1080));
@@ -33,6 +33,7 @@ int main()
     Font font;
     font.loadFromFile("images/PostModern.ttf");
     Text bonusText("", font, defaultTextSize);
+    Text scoreText("", font, defaultTextSize);
 
     Player p1(heroImage, "Player1", 256, 128, 64, 64);
 
@@ -44,7 +45,7 @@ int main()
     randomMapGenerate('a');
 
     while (window.isOpen()) {
-        ostringstream bonus;
+        ostringstream bonus, score;
         float currentMoveDelay = clockMove.getElapsedTime().asMilliseconds();
         int bonusTime, currentBonusTime;
         Event event;
@@ -53,6 +54,7 @@ int main()
                 window.close();
             }
         }
+        score << "Score: " << setfill('0') << setw(2) << p1.score;
         if (p1.update(currentMoveDelay)) {
             clockMove.restart();
         }
@@ -68,7 +70,8 @@ int main()
             bonusTime = 0;
         }
         if (bonusTime > 0) {
-            bonus << setfill('0') << setw(2) << 10 - currentBonusTime;
+            bonus << "Bonus remain: " << setfill('0') << setw(2)
+                  << 10 - currentBonusTime;
         }
         if (currentBonusTime >= bonusTime) {
             p1.speed = 1;
@@ -132,8 +135,13 @@ int main()
             bonusText.setString(bonus.str());
             bonus.str("");
             bonusText.setPosition(
-                    view.getCenter().x - 896, view.getCenter().y - 476);
+                    view.getCenter().x - 634, view.getCenter().y - 470);
             window.draw(bonusText);
+            scoreText.setString(score.str());
+            score.str("");
+            scoreText.setPosition(
+                    view.getCenter().x - 890, view.getCenter().y - 470);
+            window.draw(scoreText);
         }
         window.display();
     }
