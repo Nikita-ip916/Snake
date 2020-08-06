@@ -1,5 +1,4 @@
 #include "SFML/Graphics.hpp"
-#include "map.hpp"
 #include "player.hpp"
 #include "view.hpp"
 #include <iomanip>
@@ -40,9 +39,9 @@ int main()
     Clock clockMove, clockBonus;
     bool bonusClock = false;
 
-    randomMapGenerate('+');
-    randomMapGenerate('-');
-    randomMapGenerate('a');
+    p1.randomMapGenerate('+');
+    p1.randomMapGenerate('-');
+    p1.randomMapGenerate('a');
 
     while (window.isOpen()) {
         ostringstream bonus, score;

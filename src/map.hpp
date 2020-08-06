@@ -27,20 +27,4 @@ String TileMap[HEIGHT_MAP] = {
         "0                              0", "0                              0",
         "0                              0", "00000000000000000000000000000000",
 };
-
-void randomMapGenerate(char bonus)
-{
-    int randomElementX = 0;
-    int randomElementY = 0;
-    srand(time(0));
-    int countBonus = 1;
-    while (countBonus > 0) {
-        randomElementX = 1 + rand() % (WIDTH_MAP - 1);
-        randomElementY = 1 + rand() % (HEIGHT_MAP - 1);
-        if (TileMap[randomElementY][randomElementX] == ' ') {
-            TileMap[randomElementY][randomElementX] = bonus;
-            countBonus--;
-        }
-    }
-}
 #endif

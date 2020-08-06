@@ -1,3 +1,4 @@
+#include "map.hpp"
 #include "view.hpp"
 #include <SFML/Graphics.hpp>
 #include <iostream>
@@ -93,14 +94,22 @@ public:
                     randomMapGenerate('-');
                 } else if (TileMap[i][j] == 'a') {
                     score++;
+                    eaten = true;
                     TileMap[i][j] = ' ';
                     growth();
-                    eaten = true;
                     randomMapGenerate('a');
                 }
             }
         }
         return eaten;
+    }
+    void checkCollisionWithBody()
+    {
+        for (unsigned int i = 1; i < body.size(); i++) {
+            if (body[0].x == body[i].x && body[0].y == body[i].y) {
+                life = false;
+            }
+        }
     }
     bool update(float currentMoveDelay)
     {
@@ -143,6 +152,7 @@ public:
                     break;
                 }
                 isMoved = true;
+                checkCollisionWithBody();
             }
             setPlayerCoordinateForView(body[0].x, body[0].y);
         } else {
@@ -157,6 +167,29 @@ public:
         tile.y = body[0].y;
         tile.state = body[0].state;
         body.push_back(tile);
+    }
+    void randomMapGenerate(char bonus)
+    {
+        int randomElementX = 0;
+        int randomElementY = 0;
+        bool generate;
+        srand(time(0));
+        int countBonus = 1;
+        while (countBonus > 0) {
+            generate = true;
+            randomElementX = 1 + rand() % (WIDTH_MAP - 1);
+            randomElementY = 1 + rand() % (HEIGHT_MAP - 1);
+            for (unsigned int i = 1; i < body.size(); i++) {
+                if (body[i].x == randomElementX * 64
+                    && body[i].y == randomElementY * 64) {
+                    generate = false;
+                }
+            }
+            if (TileMap[randomElementY][randomElementX] == ' ' && generate) {
+                TileMap[randomElementY][randomElementX] = bonus;
+                countBonus--;
+            }
+        }
     }
 };
 #endif
