@@ -40,7 +40,6 @@ int main()
     bool bonusClock = false;
 
     p1.randomMapGenerate('+');
-    p1.randomMapGenerate('-');
     p1.randomMapGenerate('a');
 
     while (window.isOpen()) {
@@ -55,6 +54,7 @@ int main()
         }
         score << "Score: " << setfill('0') << setw(2) << p1.score;
         if (p1.update(currentMoveDelay)) {
+            p1.randomMapGenerate('-');
             clockMove.restart();
         }
         if (p1.bonusTimer) {

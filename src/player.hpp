@@ -25,7 +25,7 @@ public:
     Tile tile;
     float x, y, dx, dy, speed;
     int w, h, score;
-    bool life, bonusTimer;
+    bool life, bonusTimer, eaten;
     Texture texture;
     Sprite sprite;
     string name;
@@ -75,9 +75,9 @@ public:
             body[0].state = Tile::down;
         }
     }
-    bool checkCollisionWithMap()
+    void checkCollisionWithMap()
     {
-        bool eaten = false;
+        eaten = false;
         for (int i = body[0].y / 64; i < (body[0].y + h) / 64; i++) {
             for (int j = body[0].x / 64; j < (body[0].x + w) / 64; j++) {
                 if (TileMap[i][j] == '0') {
@@ -91,17 +91,17 @@ public:
                     speed = 0.5;
                     bonusTimer = true;
                     TileMap[i][j] = ' ';
-                    randomMapGenerate('-');
+                    clearStoppers();
                 } else if (TileMap[i][j] == 'a') {
                     score++;
                     eaten = true;
                     TileMap[i][j] = ' ';
                     growth();
                     randomMapGenerate('a');
+                    randomMapGenerate('+');
                 }
             }
         }
-        return eaten;
     }
     void checkCollisionWithBody()
     {
@@ -111,50 +111,64 @@ public:
             }
         }
     }
+    void clearStoppers()
+    {
+        for (int i = 1; i < WIDTH_MAP - 1; i++) {
+            for (int j = 1; j < HEIGHT_MAP - 1; j++) {
+                if (TileMap[j][i] == '-') {
+                    TileMap[j][i] = ' ';
+                }
+            }
+        }
+    }
     bool update(float currentMoveDelay)
     {
         bool isMoved = false;
-        float moveDelay = 700;
+        float moveDelay = 600;
         if (life) {
             control();
             if (currentMoveDelay * speed > moveDelay) {
-                if (!checkCollisionWithMap()) {
-                    for (unsigned int i = 1; i < body.size() - 1; i++) {
-                        body[i].x = body[i + 1].x;
-                        body[i].y = body[i + 1].y;
-                        body[i].state = body[i + 1].state;
+                checkCollisionWithMap();
+                if (life) {
+                    if (!eaten) {
+                        for (unsigned int i = 1; i < body.size() - 1; i++) {
+                            body[i].x = body[i + 1].x;
+                            body[i].y = body[i + 1].y;
+                            body[i].state = body[i + 1].state;
+                        }
                     }
+
+                    switch (body[0].state) {
+                    case Tile::left:
+                        body[body.size() - 1].x = body[0].x;
+                        body[body.size() - 1].y = body[0].y;
+                        body[body.size() - 1].state = Tile::left;
+                        body[0].x -= 64;
+                        break;
+                    case Tile::right:
+                        body[body.size() - 1].x = body[0].x;
+                        body[body.size() - 1].y = body[0].y;
+                        body[body.size() - 1].state = Tile::right;
+                        body[0].x += 64;
+                        break;
+                    case Tile::up:
+                        body[body.size() - 1].x = body[0].x;
+                        body[body.size() - 1].y = body[0].y;
+                        body[body.size() - 1].state = Tile::up;
+                        body[0].y -= 64;
+                        break;
+                    case Tile::down:
+                        body[body.size() - 1].x = body[0].x;
+                        body[body.size() - 1].y = body[0].y;
+                        body[body.size() - 1].state = Tile::down;
+                        body[0].y += 64;
+                        break;
+                    }
+                    isMoved = true;
+                    checkCollisionWithBody();
                 }
-                switch (body[0].state) {
-                case Tile::left:
-                    body[body.size() - 1].x = body[0].x;
-                    body[body.size() - 1].y = body[0].y;
-                    body[body.size() - 1].state = Tile::left;
-                    body[0].x -= 64;
-                    break;
-                case Tile::right:
-                    body[body.size() - 1].x = body[0].x;
-                    body[body.size() - 1].y = body[0].y;
-                    body[body.size() - 1].state = Tile::right;
-                    body[0].x += 64;
-                    break;
-                case Tile::up:
-                    body[body.size() - 1].x = body[0].x;
-                    body[body.size() - 1].y = body[0].y;
-                    body[body.size() - 1].state = Tile::up;
-                    body[0].y -= 64;
-                    break;
-                case Tile::down:
-                    body[body.size() - 1].x = body[0].x;
-                    body[body.size() - 1].y = body[0].y;
-                    body[body.size() - 1].state = Tile::down;
-                    body[0].y += 64;
-                    break;
-                }
-                isMoved = true;
-                checkCollisionWithBody();
+                setPlayerCoordinateForView(body[0].x, body[0].y);
             }
-            setPlayerCoordinateForView(body[0].x, body[0].y);
         } else {
             sprite.setColor(Color::Red);
         }
