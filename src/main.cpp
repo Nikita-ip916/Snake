@@ -104,7 +104,21 @@ int main()
             if (p1.body[i].name == "Head") {
                 p1.sprite.setTextureRect(IntRect(0, 0, 64, 64));
             } else if (p1.body[i].name == "Body") {
-                p1.sprite.setTextureRect(IntRect(64, 0, 64, 64));
+                if (p1.body[i].state == p1.body[i - 1].state) {
+                    p1.sprite.setTextureRect(IntRect(64, 0, 64, 64));
+                } else if (
+                        (p1.body[i].state == Player::Tile::left
+                         && p1.body[i - 1].state == Player::Tile::up)
+                        || (p1.body[i].state == Player::Tile::up
+                            && p1.body[i - 1].state == Player::Tile::right)
+                        || (p1.body[i].state == Player::Tile::right
+                            && p1.body[i - 1].state == Player::Tile::down)
+                        || (p1.body[i].state == Player::Tile::down
+                            && p1.body[i - 1].state == Player::Tile::left)) {
+                    p1.sprite.setTextureRect(IntRect(192, 0, 64, 64));
+                } else {
+                    p1.sprite.setTextureRect(IntRect(128, 0, 64, 64));
+                }
             } else if (p1.body[i].name == "Tail") {
                 p1.sprite.setTextureRect(IntRect(256, 0, 64, 64));
             }
