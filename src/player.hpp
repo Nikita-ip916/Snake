@@ -137,7 +137,6 @@ public:
                             body[i].state = body[i + 1].state;
                         }
                     }
-
                     switch (body[0].state) {
                     case Tile::left:
                         body[body.size() - 1].x = body[0].x;

@@ -33,6 +33,11 @@ int main()
     font.loadFromFile("images/PostModern.ttf");
     Text bonusText("", font, defaultTextSize);
     Text scoreText("", font, defaultTextSize);
+    Text gameOver(L"Игра окончена", font, defaultTextSize * 4);
+    bonusText.setFillColor(Color(77, 64, 37));
+    scoreText.setFillColor(Color(77, 64, 37));
+    gameOver.setFillColor(Color::Red);
+    gameOver.setStyle(Text::Bold);
 
     Player p1(heroImage, "Player1", 256, 128, 64, 64);
 
@@ -52,7 +57,7 @@ int main()
                 window.close();
             }
         }
-        score << "Score: " << setfill('0') << setw(2) << p1.score;
+        score << setfill('0') << setw(2) << p1.score;
         if (p1.update(currentMoveDelay)) {
             p1.randomMapGenerate('-');
             clockMove.restart();
@@ -69,8 +74,7 @@ int main()
             bonusTime = 0;
         }
         if (bonusTime > 0) {
-            bonus << "Bonus remain: " << setfill('0') << setw(2)
-                  << 10 - currentBonusTime;
+            bonus << setfill('0') << setw(2) << 10 - currentBonusTime;
         }
         if (currentBonusTime >= bonusTime) {
             p1.speed = 1;
@@ -145,16 +149,20 @@ int main()
             window.close();
         }
         if (p1.life) {
-            bonusText.setString(bonus.str());
+            bonusText.setString(L"Действие бонуса: " + bonus.str());
             bonus.str("");
             bonusText.setPosition(
-                    view.getCenter().x - 634, view.getCenter().y - 470);
+                    view.getCenter().x - 890, view.getCenter().y - 406);
             window.draw(bonusText);
-            scoreText.setString(score.str());
+            scoreText.setString(L"Яблок собрано: " + score.str());
             score.str("");
             scoreText.setPosition(
                     view.getCenter().x - 890, view.getCenter().y - 470);
             window.draw(scoreText);
+        } else {
+            gameOver.setPosition(
+                    view.getCenter().x - 650, view.getCenter().y - 150);
+            window.draw(gameOver);
         }
         window.display();
     }
