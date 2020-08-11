@@ -21,6 +21,7 @@ public:
         int x;
         int y;
     };
+    enum { wasd, arrows } controls;
     vector<Tile> body;
     Tile tile;
     float x, y, dx, dy, speed;
@@ -48,31 +49,54 @@ public:
         dx = dy = 0;
         bonusTimer = false;
         life = true;
-        image.createMaskFromColor(Color(255, 255, 255));
         texture.loadFromImage(image);
         sprite.setTexture(texture);
         sprite.setOrigin(w / 2, h / 2);
+        if (name == "Player1") {
+            controls = wasd;
+        }
         if (name == "Player2") {
-            sprite.setColor(Color::Red);
+            sprite.setColor(Color::Blue);
+            controls = arrows;
         }
     }
     void control()
     {
-        if (Keyboard::isKeyPressed(Keyboard::Left)
-            && body[body.size() - 1].state != Tile::right) {
-            body[0].state = Tile::left;
-        } else if (
-                Keyboard::isKeyPressed(Keyboard::Right)
-                && body[body.size() - 1].state != Tile::left) {
-            body[0].state = Tile::right;
-        } else if (
-                Keyboard::isKeyPressed(Keyboard::Up)
-                && body[body.size() - 1].state != Tile::down) {
-            body[0].state = Tile::up;
-        } else if (
-                Keyboard::isKeyPressed(Keyboard::Down)
-                && body[body.size() - 1].state != Tile::up) {
-            body[0].state = Tile::down;
+        if (controls == wasd) {
+            if (Keyboard::isKeyPressed(Keyboard::A)
+                && body[body.size() - 1].state != Tile::right) {
+                body[0].state = Tile::left;
+            } else if (
+                    Keyboard::isKeyPressed(Keyboard::D)
+                    && body[body.size() - 1].state != Tile::left) {
+                body[0].state = Tile::right;
+            } else if (
+                    Keyboard::isKeyPressed(Keyboard::W)
+                    && body[body.size() - 1].state != Tile::down) {
+                body[0].state = Tile::up;
+            } else if (
+                    Keyboard::isKeyPressed(Keyboard::S)
+                    && body[body.size() - 1].state != Tile::up) {
+                body[0].state = Tile::down;
+            }
+        }
+        if (controls == arrows) {
+            if (Keyboard::isKeyPressed(Keyboard::Left)
+                && body[body.size() - 1].state != Tile::right) {
+                body[0].state = Tile::left;
+            } else if (
+                    Keyboard::isKeyPressed(Keyboard::Right)
+                    && body[body.size() - 1].state != Tile::left) {
+                body[0].state = Tile::right;
+            } else if (
+                    Keyboard::isKeyPressed(Keyboard::Up)
+                    && body[body.size() - 1].state != Tile::down) {
+                body[0].state = Tile::up;
+            } else if (
+                    Keyboard::isKeyPressed(Keyboard::Down)
+                    && body[body.size() - 1].state != Tile::up) {
+                body[0].state = Tile::down;
+            }
         }
     }
     void checkCollisionWithMap()
