@@ -180,7 +180,11 @@ public:
                     isMoved = true;
                     checkCollisionWithBody();
                 }
-                setPlayerCoordinateForView(body[0].x, body[0].y);
+                if (name == "Player1") {
+                    setPlayerCoordinateForView(body[0].x, body[0].y);
+                } else if (name == "Player2") {
+                    setPlayer2CoordinateForView(body[0].x, body[0].y);
+                }
             }
         } else {
             sprite.setColor(Color::Red);

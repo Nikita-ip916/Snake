@@ -19,6 +19,7 @@ int main()
     const int defaultTextSize = 50;
     RenderWindow window(VideoMode(1920, 1080), "Snake 2020", Style::Fullscreen);
     view.reset(FloatRect(0, 0, 1920, 1080));
+    // viewP2.reset(FloatRect(960, 0, 1920, 1080));
 
     Image mapImage;
     mapImage.loadFromFile("images/tiles.png");
@@ -40,6 +41,7 @@ int main()
     gameOver.setStyle(Text::Bold);
 
     Player p1(heroImage, "Player1", 256, 128, 64, 64);
+    Player p2(heroImage, "Player2", 512, 256, 64, 64);
 
     Clock clockMove, clockBonus;
     bool bonusClock = false;
@@ -82,6 +84,9 @@ int main()
             bonusClock = false;
         }
         window.setView(view);
+        /*view.setViewport(FloatRect(0, 0, 0.5f, 1));
+        window.setView(viewP2);
+        viewP2.setViewport(FloatRect(0.5f, 0, 1, 1));*/
         window.clear();
         for (int i = 0; i < HEIGHT_MAP; i++) {
             for (int j = 0; j < WIDTH_MAP; j++) {
