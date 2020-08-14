@@ -17,7 +17,6 @@ int main()
 {
     // setlocale(LC_CTYPE, "rus");
     const int defaultTextSize = 50;
-
     string plNumber = "1";
     cout << "Введите кол-во игроков(1 или 2):\n";
     do {
@@ -31,7 +30,7 @@ int main()
         plNumber = "2";
     }
     RenderWindow window(VideoMode(1920, 1080), "Snake 2020", Style::Fullscreen);
-    window.setVerticalSyncEnabled(true);
+    // window.setVerticalSyncEnabled(true);
     changeView(plNumber);
 
     Image mapImage;
@@ -48,7 +47,6 @@ int main()
     Text bonusText("", font, defaultTextSize);
     Text scoreText("", font, defaultTextSize);
     Text gameOver(L"    Игра\nокончена", font, defaultTextSize * 4);
-
     bonusText.setFillColor(Color(77, 64, 37));
     scoreText.setFillColor(Color(77, 64, 37));
     gameOver.setFillColor(Color::Red);
@@ -71,25 +69,23 @@ int main()
         currentMoveDelay[2] = clockMove[2].getElapsedTime().asMilliseconds();
         int bonusTime[3], currentBonusTime[3];
         Event event;
-        while (window.pollEvent(event)) {
-            if (event.type == Event::Closed) {
+        while (window.pollEvent(event))
+            if (event.type == Event::Closed)
                 window.close();
-            }
-        }
-        if (Keyboard::isKeyPressed(Keyboard::Escape)) {
+        if (Keyboard::isKeyPressed(Keyboard::Escape))
             window.close();
-        }
         score[1] << setfill('0') << setw(2) << p1.score;
-        score[2] << setfill('0') << setw(2) << p2.score;
         if (p1.update(currentMoveDelay[1])) {
             p1.randomMapGenerate('-');
             clockMove[1].restart();
         }
-        if (plNumber == "2")
+        if (plNumber == "2") {
+            score[2] << setfill('0') << setw(2) << p2.score;
             if (p2.update(currentMoveDelay[2])) {
                 p2.randomMapGenerate('-');
                 clockMove[2].restart();
             }
+        }
         if (p1.bonusTimer) {
             bonusTime[1] = 10;
             bonusClock[1] = true;
@@ -109,9 +105,8 @@ int main()
             } else {
                 bonusTime[i] = 0;
             }
-            if (bonusTime[i] > 0) {
+            if (bonusTime[i] > 0)
                 bonus[i] << setfill('0') << setw(2) << 10 - currentBonusTime[i];
-            }
         }
         if (currentBonusTime[1] >= bonusTime[1]) {
             p1.speed = 1;
@@ -147,106 +142,50 @@ int main()
                 window.draw(map);
             }
         }
-
         for (unsigned int i = 0; i < p1.body.size(); i++) {
-            if (p1.body[i].name == "Head") {
-                p1.sprite.setTextureRect(IntRect(0, 0, 64, 64));
-            } else if (p1.body[i].name == "Body") {
-                if (p1.body[i].state == p1.body[i - 1].state) {
-                    p1.sprite.setTextureRect(IntRect(64, 0, 64, 64));
-                } else if (
-                        (p1.body[i].state == Player::Tile::left
-                         && p1.body[i - 1].state == Player::Tile::up)
-                        || (p1.body[i].state == Player::Tile::up
-                            && p1.body[i - 1].state == Player::Tile::right)
-                        || (p1.body[i].state == Player::Tile::right
-                            && p1.body[i - 1].state == Player::Tile::down)
-                        || (p1.body[i].state == Player::Tile::down
-                            && p1.body[i - 1].state == Player::Tile::left)) {
-                    p1.sprite.setTextureRect(IntRect(192, 0, 64, 64));
-                } else {
-                    p1.sprite.setTextureRect(IntRect(128, 0, 64, 64));
-                }
-            } else if (p1.body[i].name == "Tail") {
-                p1.sprite.setTextureRect(IntRect(256, 0, 64, 64));
-            }
-            switch (p1.body[i].state) {
-            case Player::Tile::left:
-                p1.sprite.setRotation(180);
-                break;
-            case Player::Tile::right:
-                p1.sprite.setRotation(0);
-                break;
-            case Player::Tile::up:
-                p1.sprite.setRotation(270);
-                break;
-            case Player::Tile::down:
-                p1.sprite.setRotation(90);
-                break;
-            }
-            p1.sprite.setPosition(
-                    p1.body[i].x + p1.w / 2, p1.body[i].y + p1.h / 2);
+            p1.setBodySprite(i);
             window.draw(p1.sprite);
             p1.sprite.setRotation(0);
         }
-        if (plNumber == "2")
+        if (plNumber == "2") {
             for (unsigned int i = 0; i < p2.body.size(); i++) {
-                if (p2.body[i].name == "Head") {
-                    p2.sprite.setTextureRect(IntRect(0, 0, 64, 64));
-                } else if (p2.body[i].name == "Body") {
-                    if (p2.body[i].state == p2.body[i - 1].state) {
-                        p2.sprite.setTextureRect(IntRect(64, 0, 64, 64));
-                    } else if (
-                            (p2.body[i].state == Player::Tile::left
-                             && p2.body[i - 1].state == Player::Tile::up)
-                            || (p2.body[i].state == Player::Tile::up
-                                && p2.body[i - 1].state == Player::Tile::right)
-                            || (p2.body[i].state == Player::Tile::right
-                                && p2.body[i - 1].state == Player::Tile::down)
-                            || (p2.body[i].state == Player::Tile::down
-                                && p2.body[i - 1].state
-                                        == Player::Tile::left)) {
-                        p2.sprite.setTextureRect(IntRect(192, 0, 64, 64));
-                    } else {
-                        p2.sprite.setTextureRect(IntRect(128, 0, 64, 64));
-                    }
-                } else if (p2.body[i].name == "Tail") {
-                    p2.sprite.setTextureRect(IntRect(256, 0, 64, 64));
-                }
-                switch (p2.body[i].state) {
-                case Player::Tile::left:
-                    p2.sprite.setRotation(180);
-                    break;
-                case Player::Tile::right:
-                    p2.sprite.setRotation(0);
-                    break;
-                case Player::Tile::up:
-                    p2.sprite.setRotation(270);
-                    break;
-                case Player::Tile::down:
-                    p2.sprite.setRotation(90);
-                    break;
-                }
-                p2.sprite.setPosition(
-                        p2.body[i].x + p2.w / 2, p2.body[i].y + p2.h / 2);
+                p2.setBodySprite(i);
                 window.draw(p2.sprite);
                 p2.sprite.setRotation(0);
             }
-        scoreText.setString(L"Яблок собрано: " + score[1].str());
-        score[1].str("");
-        scoreText.setPosition(
-                view.getCenter().x - 406, view.getCenter().y - 470);
-        window.draw(scoreText);
-        if (p1.life) {
-            bonusText.setString(L"Действие бонуса: " + bonus[1].str());
-            bonus[1].str("");
-            bonusText.setPosition(
-                    view.getCenter().x - 406, view.getCenter().y - 406);
-            window.draw(bonusText);
+            scoreText.setString(L"Яблок собрано: " + score[1].str());
+            score[1].str("");
+            scoreText.setPosition(
+                    view.getCenter().x - 406, view.getCenter().y - 470);
+            window.draw(scoreText);
+            if (p1.life) {
+                bonusText.setString(L"Действие бонуса: " + bonus[1].str());
+                bonus[1].str("");
+                bonusText.setPosition(
+                        view.getCenter().x - 406, view.getCenter().y - 406);
+                window.draw(bonusText);
+            } else {
+                gameOver.setPosition(
+                        view.getCenter().x - 440, view.getCenter().y - 256);
+                window.draw(gameOver);
+            }
         } else {
-            gameOver.setPosition(
-                    view.getCenter().x - 440, view.getCenter().y - 256);
-            window.draw(gameOver);
+            scoreText.setString(L"Яблок собрано: " + score[1].str());
+            score[1].str("");
+            scoreText.setPosition(
+                    view.getCenter().x - 890, view.getCenter().y - 470);
+            window.draw(scoreText);
+            if (p1.life) {
+                bonusText.setString(L"Действие бонуса: " + bonus[1].str());
+                bonus[1].str("");
+                bonusText.setPosition(
+                        view.getCenter().x - 890, view.getCenter().y - 406);
+                window.draw(bonusText);
+            } else {
+                gameOver.setPosition(
+                        view.getCenter().x - 650, view.getCenter().y - 150);
+                window.draw(gameOver);
+            }
         }
 
         if (plNumber == "2") {
@@ -273,86 +212,12 @@ int main()
                 }
             }
             for (unsigned int i = 0; i < p1.body.size(); i++) {
-                if (p1.body[i].name == "Head") {
-                    p1.sprite.setTextureRect(IntRect(0, 0, 64, 64));
-                } else if (p1.body[i].name == "Body") {
-                    if (p1.body[i].state == p1.body[i - 1].state) {
-                        p1.sprite.setTextureRect(IntRect(64, 0, 64, 64));
-                    } else if (
-                            (p1.body[i].state == Player::Tile::left
-                             && p1.body[i - 1].state == Player::Tile::up)
-                            || (p1.body[i].state == Player::Tile::up
-                                && p1.body[i - 1].state == Player::Tile::right)
-                            || (p1.body[i].state == Player::Tile::right
-                                && p1.body[i - 1].state == Player::Tile::down)
-                            || (p1.body[i].state == Player::Tile::down
-                                && p1.body[i - 1].state
-                                        == Player::Tile::left)) {
-                        p1.sprite.setTextureRect(IntRect(192, 0, 64, 64));
-                    } else {
-                        p1.sprite.setTextureRect(IntRect(128, 0, 64, 64));
-                    }
-                } else if (p1.body[i].name == "Tail") {
-                    p1.sprite.setTextureRect(IntRect(256, 0, 64, 64));
-                }
-                switch (p1.body[i].state) {
-                case Player::Tile::left:
-                    p1.sprite.setRotation(180);
-                    break;
-                case Player::Tile::right:
-                    p1.sprite.setRotation(0);
-                    break;
-                case Player::Tile::up:
-                    p1.sprite.setRotation(270);
-                    break;
-                case Player::Tile::down:
-                    p1.sprite.setRotation(90);
-                    break;
-                }
-                p1.sprite.setPosition(
-                        p1.body[i].x + p1.w / 2, p1.body[i].y + p1.h / 2);
+                p1.setBodySprite(i);
                 window.draw(p1.sprite);
                 p1.sprite.setRotation(0);
             }
             for (unsigned int i = 0; i < p2.body.size(); i++) {
-                if (p2.body[i].name == "Head") {
-                    p2.sprite.setTextureRect(IntRect(0, 0, 64, 64));
-                } else if (p2.body[i].name == "Body") {
-                    if (p2.body[i].state == p2.body[i - 1].state) {
-                        p2.sprite.setTextureRect(IntRect(64, 0, 64, 64));
-                    } else if (
-                            (p2.body[i].state == Player::Tile::left
-                             && p2.body[i - 1].state == Player::Tile::up)
-                            || (p2.body[i].state == Player::Tile::up
-                                && p2.body[i - 1].state == Player::Tile::right)
-                            || (p2.body[i].state == Player::Tile::right
-                                && p2.body[i - 1].state == Player::Tile::down)
-                            || (p2.body[i].state == Player::Tile::down
-                                && p2.body[i - 1].state
-                                        == Player::Tile::left)) {
-                        p2.sprite.setTextureRect(IntRect(192, 0, 64, 64));
-                    } else {
-                        p2.sprite.setTextureRect(IntRect(128, 0, 64, 64));
-                    }
-                } else if (p2.body[i].name == "Tail") {
-                    p2.sprite.setTextureRect(IntRect(256, 0, 64, 64));
-                }
-                switch (p2.body[i].state) {
-                case Player::Tile::left:
-                    p2.sprite.setRotation(180);
-                    break;
-                case Player::Tile::right:
-                    p2.sprite.setRotation(0);
-                    break;
-                case Player::Tile::up:
-                    p2.sprite.setRotation(270);
-                    break;
-                case Player::Tile::down:
-                    p2.sprite.setRotation(90);
-                    break;
-                }
-                p2.sprite.setPosition(
-                        p2.body[i].x + p2.w / 2, p2.body[i].y + p2.h / 2);
+                p2.setBodySprite(i);
                 window.draw(p2.sprite);
                 p2.sprite.setRotation(0);
             }

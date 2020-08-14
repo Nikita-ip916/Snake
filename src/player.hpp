@@ -59,9 +59,8 @@ public:
         texture.loadFromImage(image);
         sprite.setTexture(texture);
         sprite.setOrigin(w / 2, h / 2);
-        if (name == "Player1") {
+        if (name == "Player1")
             controls = wasd;
-        }
         if (name == "Player2") {
             sprite.setColor(Color::Magenta);
             controls = arrows;
@@ -106,10 +105,40 @@ public:
             }
         }
     }
+    void growth()
+    {
+        tile.name = "Body";
+        tile.x = body[0].x;
+        tile.y = body[0].y;
+        tile.state = body[0].state;
+        body.push_back(tile);
+    }
+    void randomMapGenerate(char bonus)
+    {
+        int randomElementX = 0;
+        int randomElementY = 0;
+        bool generate;
+        srand(time(0));
+        int countBonus = 1;
+        while (countBonus > 0) {
+            generate = true;
+            randomElementX = 1 + rand() % (WIDTH_MAP - 1);
+            randomElementY = 1 + rand() % (HEIGHT_MAP - 1);
+            for (unsigned int i = 1; i < body.size(); i++) {
+                if (body[i].x == randomElementX * 64
+                    && body[i].y == randomElementY * 64)
+                    generate = false;
+            }
+            if (TileMap[randomElementY][randomElementX] == ' ' && generate) {
+                TileMap[randomElementY][randomElementX] = bonus;
+                countBonus--;
+            }
+        }
+    }
     void checkCollisionWithMap()
     {
         eaten = false;
-        for (int i = body[0].y / 64; i < (body[0].y + h) / 64; i++) {
+        for (int i = body[0].y / 64; i < (body[0].y + h) / 64; i++)
             for (int j = body[0].x / 64; j < (body[0].x + w) / 64; j++) {
                 if (TileMap[i][j] == '0') {
                     life = false;
@@ -132,15 +161,12 @@ public:
                     randomMapGenerate('+');
                 }
             }
-        }
     }
     void checkCollisionWithBody()
     {
-        for (unsigned int i = 1; i < body.size(); i++) {
-            if (body[0].x == body[i].x && body[0].y == body[i].y) {
+        for (unsigned int i = 1; i < body.size(); i++)
+            if (body[0].x == body[i].x && body[0].y == body[i].y)
                 life = false;
-            }
-        }
     }
     bool update(float currentMoveDelay)
     {
@@ -151,13 +177,12 @@ public:
             if (currentMoveDelay * speed > moveDelay) {
                 checkCollisionWithMap();
                 if (life) {
-                    if (!eaten) {
+                    if (!eaten)
                         for (unsigned int i = 1; i < body.size() - 1; i++) {
                             body[i].x = body[i + 1].x;
                             body[i].y = body[i + 1].y;
                             body[i].state = body[i + 1].state;
                         }
-                    }
                     switch (body[0].state) {
                     case Tile::left:
                         body[body.size() - 1].x = body[0].x;
@@ -187,50 +212,57 @@ public:
                     isMoved = true;
                     checkCollisionWithBody();
                 }
-                if (plNumber == "1") {
-                    setPlayerCoordinateForView(body[0].x, body[0].y);
-                } else if (plNumber == "2") {
-                    if (name == "Player1")
-                        setPlayer1CoordinateForView(body[0].x, body[0].y);
-                    if (name == "Player2")
-                        setPlayer2CoordinateForView(body[0].x, body[0].y);
-                }
             }
-        } else {
+            if (plNumber == "1") {
+                setPlayerCoordinateForView(body[0].x, body[0].y);
+            } else if (plNumber == "2") {
+                if (name == "Player1")
+                    setPlayer1CoordinateForView(body[0].x, body[0].y);
+                if (name == "Player2")
+                    setPlayer2CoordinateForView(body[0].x, body[0].y);
+            }
+        } else
             sprite.setColor(Color::Black);
-        }
         return isMoved;
     }
-    void growth()
+    void setBodySprite(unsigned int i)
     {
-        tile.name = "Body";
-        tile.x = body[0].x;
-        tile.y = body[0].y;
-        tile.state = body[0].state;
-        body.push_back(tile);
-    }
-    void randomMapGenerate(char bonus)
-    {
-        int randomElementX = 0;
-        int randomElementY = 0;
-        bool generate;
-        srand(time(0));
-        int countBonus = 1;
-        while (countBonus > 0) {
-            generate = true;
-            randomElementX = 1 + rand() % (WIDTH_MAP - 1);
-            randomElementY = 1 + rand() % (HEIGHT_MAP - 1);
-            for (unsigned int i = 1; i < body.size(); i++) {
-                if (body[i].x == randomElementX * 64
-                    && body[i].y == randomElementY * 64) {
-                    generate = false;
-                }
+        if (body[i].name == "Head") {
+            sprite.setTextureRect(IntRect(0, 0, 64, 64));
+        } else if (body[i].name == "Body") {
+            if (body[i].state == body[i - 1].state) {
+                sprite.setTextureRect(IntRect(64, 0, 64, 64));
+            } else if (
+                    (body[i].state == Player::Tile::left
+                     && body[i - 1].state == Player::Tile::up)
+                    || (body[i].state == Player::Tile::up
+                        && body[i - 1].state == Player::Tile::right)
+                    || (body[i].state == Player::Tile::right
+                        && body[i - 1].state == Player::Tile::down)
+                    || (body[i].state == Player::Tile::down
+                        && body[i - 1].state == Player::Tile::left)) {
+                sprite.setTextureRect(IntRect(192, 0, 64, 64));
+            } else {
+                sprite.setTextureRect(IntRect(128, 0, 64, 64));
             }
-            if (TileMap[randomElementY][randomElementX] == ' ' && generate) {
-                TileMap[randomElementY][randomElementX] = bonus;
-                countBonus--;
-            }
+        } else if (body[i].name == "Tail") {
+            sprite.setTextureRect(IntRect(256, 0, 64, 64));
         }
+        switch (body[i].state) {
+        case Player::Tile::left:
+            sprite.setRotation(180);
+            break;
+        case Player::Tile::right:
+            sprite.setRotation(0);
+            break;
+        case Player::Tile::up:
+            sprite.setRotation(270);
+            break;
+        case Player::Tile::down:
+            sprite.setRotation(90);
+            break;
+        }
+        sprite.setPosition(body[i].x + w / 2, body[i].y + h / 2);
     }
 };
 #endif
