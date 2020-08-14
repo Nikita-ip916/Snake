@@ -124,7 +124,7 @@ public:
             generate = true;
             randomElementX = 1 + rand() % (WIDTH_MAP - 1);
             randomElementY = 1 + rand() % (HEIGHT_MAP - 1);
-            for (unsigned int i = 1; i < body.size(); i++) {
+            for (unsigned int i = 0; i < body.size(); i++) {
                 if (body[i].x == randomElementX * 64
                     && body[i].y == randomElementY * 64)
                     generate = false;
