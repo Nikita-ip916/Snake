@@ -8,7 +8,7 @@ View view, viewP2;
 void setPlayerCoordinateForView(float x, float y)
 {
     float tempX = x, tempY = y;
-    int halfW = 480, halfH = 540, tileSize = 64;
+    int halfW = 474, halfH = 540, tileSize = 64;
 
     if (x < halfW)
         tempX = halfW;
@@ -24,7 +24,7 @@ void setPlayerCoordinateForView(float x, float y)
 void setPlayer2CoordinateForView(float x, float y)
 {
     float tempX = x, tempY = y;
-    int halfW = 480, halfH = 540, tileSize = 64;
+    int halfW = 474, halfH = 540, tileSize = 64;
 
     if (x < halfW)
         tempX = halfW;
@@ -40,10 +40,10 @@ void setPlayer2CoordinateForView(float x, float y)
 void changeView()
 {
     if (Keyboard::isKeyPressed(Keyboard::E)) {
-        view.setSize(960, 1080);
-        view.setViewport(FloatRect(0, 0, 0.5f, 1));
-        viewP2.setSize(960, 1080);
-        viewP2.setViewport(FloatRect(0.5f, 0, 0.5f, 1));
+        view.setSize(948, 1080);
+        view.setViewport(FloatRect(0, 0, 0.49375f, 1));
+        viewP2.setSize(948, 1080);
+        viewP2.setViewport(FloatRect(0.50625f, 0, 0.49375f, 1));
     }
     if (Keyboard::isKeyPressed(Keyboard::Q)) {
         view.setSize(1920, 1080);

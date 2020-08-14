@@ -17,8 +17,8 @@ int main()
 {
     // setlocale(LC_CTYPE, "rus");
     const int defaultTextSize = 50;
-    RenderWindow window(
-            VideoMode(1920, 1080), "Snake 2020" /*, Style::Fullscreen*/);
+    RenderWindow window(VideoMode(1920, 1080), "Snake 2020", Style::Fullscreen);
+    window.setVerticalSyncEnabled(true);
     view.reset(FloatRect(0, 0, 1920, 1080));
     viewP2.reset(FloatRect(0, 0, 0, 0));
 
@@ -110,7 +110,7 @@ int main()
             bonusTime[2] = 0;
             bonusClock[2] = false;
         }
-        window.clear();
+        window.clear(Color(77, 64, 37));
         changeView();
 
         window.setView(view);
@@ -231,7 +231,8 @@ int main()
                     view.getCenter().x - 406, view.getCenter().y - 470);
             window.draw(scoreText);
         } else {
-            gameOver.setPosition(view.getCenter().x, view.getCenter().y);
+            gameOver.setPosition(
+                    view.getCenter().x - 440, view.getCenter().y - 256);
             window.draw(gameOver);
         }
 
@@ -352,7 +353,8 @@ int main()
                     viewP2.getCenter().x - 415, viewP2.getCenter().y - 470);
             window.draw(scoreText);
         } else {
-            gameOver.setPosition(view.getCenter().x, view.getCenter().y);
+            gameOver.setPosition(
+                    viewP2.getCenter().x - 440, viewP2.getCenter().y - 256);
             window.draw(gameOver);
         }
         window.display();
