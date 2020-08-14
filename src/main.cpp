@@ -30,7 +30,7 @@ int main()
         plNumber = "2";
     }
     RenderWindow window(VideoMode(1920, 1080), "Snake 2020", Style::Fullscreen);
-    // window.setVerticalSyncEnabled(true);
+    window.setVerticalSyncEnabled(true);
     changeView(plNumber);
 
     Image mapImage;

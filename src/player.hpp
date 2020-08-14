@@ -214,12 +214,12 @@ public:
                 }
             }
             if (plNumber == "1") {
-                setPlayerCoordinateForView(body[0].x, body[0].y);
+                setPlayerCoordinateForView(body[0].x, body[0].y, speed);
             } else if (plNumber == "2") {
                 if (name == "Player1")
-                    setPlayer1CoordinateForView(body[0].x, body[0].y);
+                    setPlayer1CoordinateForView(body[0].x, body[0].y, speed);
                 if (name == "Player2")
-                    setPlayer2CoordinateForView(body[0].x, body[0].y);
+                    setPlayer2CoordinateForView(body[0].x, body[0].y, speed);
             }
         } else
             sprite.setColor(Color::Black);
