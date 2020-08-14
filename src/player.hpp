@@ -29,13 +29,20 @@ public:
     bool life, bonusTimer, eaten;
     Texture texture;
     Sprite sprite;
-    string name;
-    Player(Image& image, string Name, float X, float Y, float W, float H)
+    string name, plNumber;
+    Player(Image& image,
+           string PlNumber,
+           string Name,
+           float X,
+           float Y,
+           float W,
+           float H)
     {
         x = tile.x = X;
         y = tile.y = Y;
         w = W;
         h = H;
+        plNumber = PlNumber;
         name = Name;
         tile.name = "Head";
         tile.state = Tile::right;
@@ -56,7 +63,7 @@ public:
             controls = wasd;
         }
         if (name == "Player2") {
-            sprite.setColor(Color::Blue);
+            sprite.setColor(Color::Magenta);
             controls = arrows;
         }
     }
@@ -180,14 +187,17 @@ public:
                     isMoved = true;
                     checkCollisionWithBody();
                 }
-                if (name == "Player1") {
+                if (plNumber == "1") {
                     setPlayerCoordinateForView(body[0].x, body[0].y);
-                } else if (name == "Player2") {
-                    setPlayer2CoordinateForView(body[0].x, body[0].y);
+                } else if (plNumber == "2") {
+                    if (name == "Player1")
+                        setPlayer1CoordinateForView(body[0].x, body[0].y);
+                    if (name == "Player2")
+                        setPlayer2CoordinateForView(body[0].x, body[0].y);
                 }
             }
         } else {
-            sprite.setColor(Color::Red);
+            sprite.setColor(Color::Black);
         }
         return isMoved;
     }
