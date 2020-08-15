@@ -23,10 +23,11 @@ public:
     };
     enum { wasd, arrows } controls;
     vector<Tile> body;
+    vector<Tile> oppositeBody;
     Tile tile;
     float x, y, dx, dy, speed;
     int w, h, score;
-    bool life, bonusTimer, eaten;
+    bool life, bonusTimer, eaten, winner;
     Texture texture;
     Sprite sprite;
     string name, plNumber;
@@ -54,7 +55,7 @@ public:
         score = 0;
         speed = 1;
         dx = dy = 0;
-        bonusTimer = false;
+        bonusTimer = eaten = winner = false;
         life = true;
         texture.loadFromImage(image);
         sprite.setTexture(texture);
@@ -129,6 +130,11 @@ public:
                     && body[i].y == randomElementY * 64)
                     generate = false;
             }
+            for (unsigned int i = 0; i < oppositeBody.size(); i++) {
+                if (oppositeBody[i].x == randomElementX * 64
+                    && oppositeBody[i].y == randomElementY * 64)
+                    generate = false;
+            }
             if (TileMap[randomElementY][randomElementX] == ' ' && generate) {
                 TileMap[randomElementY][randomElementX] = bonus;
                 countBonus--;
@@ -166,6 +172,10 @@ public:
     {
         for (unsigned int i = 1; i < body.size(); i++)
             if (body[0].x == body[i].x && body[0].y == body[i].y)
+                life = false;
+        for (unsigned int i = 0; i < oppositeBody.size(); i++)
+            if (body[0].x == oppositeBody[i].x
+                && body[0].y == oppositeBody[i].y)
                 life = false;
     }
     bool update(float currentMoveDelay)
@@ -221,8 +231,7 @@ public:
                 if (name == "Player2")
                     setPlayer2CoordinateForView(body[0].x, body[0].y, speed);
             }
-        } else
-            sprite.setColor(Color::Black);
+        }
         return isMoved;
     }
     void setBodySprite(unsigned int i)
