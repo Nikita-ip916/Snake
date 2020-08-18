@@ -3,19 +3,16 @@
 #include "view.hpp"
 #include <iomanip>
 #include <iostream>
-//#include <locale>
 #include <math.h>
 #include <sstream>
 #include <stdio.h>
 #include <stdlib.h>
-//#include <string>
 
 using namespace std;
 using namespace sf;
 
 int main()
 {
-    // setlocale(LC_CTYPE, "rus");
     const int defaultTextSize = 50;
     string plNumber = "1";
     cout << "Введите кол-во игроков(1 или 2):\n";
