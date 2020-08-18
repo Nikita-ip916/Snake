@@ -22,10 +22,9 @@ public:
         int y;
     };
     enum { wasd, arrows } controls;
-    vector<Tile> body;
-    vector<Tile> oppositeBody;
+    vector<Tile> body, oppositeBody;
     Tile tile;
-    float x, y, dx, dy, speed;
+    float x, y, speed;
     int w, h, score;
     bool life, bonusTimer, eaten, winner;
     Texture texture;
@@ -54,15 +53,14 @@ public:
         body.push_back(tile);
         score = 0;
         speed = 1;
-        dx = dy = 0;
         bonusTimer = eaten = winner = false;
         life = true;
         texture.loadFromImage(image);
         sprite.setTexture(texture);
         sprite.setOrigin(w / 2, h / 2);
-        if (name == "Player1")
+        if (name == "Player1") {
             controls = wasd;
-        if (name == "Player2") {
+        } else if (name == "Player2") {
             sprite.setColor(Color::Magenta);
             controls = arrows;
         }
@@ -86,8 +84,7 @@ public:
                     && body[body.size() - 1].state != Tile::up) {
                 body[0].state = Tile::down;
             }
-        }
-        if (controls == arrows) {
+        } else if (controls == arrows) {
             if (Keyboard::isKeyPressed(Keyboard::Left)
                 && body[body.size() - 1].state != Tile::right) {
                 body[0].state = Tile::left;
@@ -228,7 +225,7 @@ public:
             } else if (plNumber == "2") {
                 if (name == "Player1")
                     setPlayer1CoordinateForView(body[0].x, body[0].y, speed);
-                if (name == "Player2")
+                else if (name == "Player2")
                     setPlayer2CoordinateForView(body[0].x, body[0].y, speed);
             }
         }

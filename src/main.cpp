@@ -3,19 +3,16 @@
 #include "view.hpp"
 #include <iomanip>
 #include <iostream>
-//#include <locale>
 #include <math.h>
 #include <sstream>
 #include <stdio.h>
 #include <stdlib.h>
-//#include <string>
 
 using namespace std;
 using namespace sf;
 
 int main()
 {
-    // setlocale(LC_CTYPE, "rus");
     const int defaultTextSize = 50;
     string plNumber = "1";
     cout << "Введите кол-во игроков(1 или 2):\n";
@@ -33,21 +30,19 @@ int main()
     window.setVerticalSyncEnabled(true);
     changeView(plNumber);
 
-    Image mapImage;
-    mapImage.loadFromFile("images/tiles.png");
+    Image tiles;
+    tiles.loadFromFile("images/tiles.png");
     Texture mapTexture;
-    mapTexture.loadFromImage(mapImage);
+    mapTexture.loadFromImage(tiles);
     Sprite map;
     map.setTexture(mapTexture);
 
-    Image heroImage;
-    heroImage.loadFromFile("images/tiles.png");
     Font font;
     font.loadFromFile("images/PostModern.ttf");
-    Text bonusText("", font, defaultTextSize);
-    Text scoreText("", font, defaultTextSize);
-    Text gameOver(L"    Игра\nокончена", font, defaultTextSize * 4);
-    Text gameWon(L"      Вы\nпобедили", font, defaultTextSize * 4);
+    Text bonusText("", font, defaultTextSize),
+            scoreText("", font, defaultTextSize),
+            gameOver(L"    Игра\nокончена", font, defaultTextSize * 4),
+            gameWon(L"      Вы\nпобедили", font, defaultTextSize * 4);
     bonusText.setFillColor(Color(77, 64, 37));
     scoreText.setFillColor(Color(77, 64, 37));
     gameOver.setFillColor(Color::Red);
@@ -55,8 +50,8 @@ int main()
     gameWon.setFillColor(Color::Cyan);
     gameWon.setStyle(Text::Bold);
     while (window.isOpen()) {
-        Player p1(heroImage, plNumber, "Player1", 512, 768, 64, 64);
-        Player p2(heroImage, plNumber, "Player2", 512, 1280, 64, 64);
+        Player p1(tiles, plNumber, "Player1", 512, 768, 64, 64);
+        Player p2(tiles, plNumber, "Player2", 512, 1280, 64, 64);
 
         Clock clockMove[3], clockBonus[3];
         bool bonusClock[3];
@@ -144,7 +139,7 @@ int main()
             window.clear(Color(77, 64, 37));
 
             window.setView(view);
-            for (int i = 0; i < HEIGHT_MAP; i++) {
+            for (int i = 0; i < HEIGHT_MAP; i++)
                 for (int j = 0; j < WIDTH_MAP; j++) {
                     if (TileMap[i][j] == ' ') {
                         map.setTextureRect(IntRect(320, 0, 64, 64));
@@ -164,14 +159,12 @@ int main()
                     map.setPosition(j * 64, i * 64);
                     window.draw(map);
                 }
-            }
-            if (plNumber == "2") {
+            if (plNumber == "2")
                 for (unsigned int i = 0; i < p2.body.size(); i++) {
                     p2.setBodySprite(i);
                     window.draw(p2.sprite);
                     p2.sprite.setRotation(0);
                 }
-            }
             for (unsigned int i = 0; i < p1.body.size(); i++) {
                 p1.setBodySprite(i);
                 window.draw(p1.sprite);
@@ -225,7 +218,7 @@ int main()
 
             if (plNumber == "2") {
                 window.setView(viewP2);
-                for (int i = 0; i < HEIGHT_MAP; i++) {
+                for (int i = 0; i < HEIGHT_MAP; i++)
                     for (int j = 0; j < WIDTH_MAP; j++) {
                         if (TileMap[i][j] == ' ') {
                             map.setTextureRect(IntRect(320, 0, 64, 64));
@@ -245,7 +238,6 @@ int main()
                         map.setPosition(j * 64, i * 64);
                         window.draw(map);
                     }
-                }
                 for (unsigned int i = 0; i < p1.body.size(); i++) {
                     p1.setBodySprite(i);
                     window.draw(p1.sprite);

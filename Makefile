@@ -18,5 +18,5 @@ runprog:
 		./bin/$(OUT)
 
 clean:
-		rm -rf bin/$(OUT) bin/$(RUN)
-		rm -rf build/src/*.o build/test/*.cpp
+		rm -rf bin/$(OUT)
+		rm -rf build/src/*.o
