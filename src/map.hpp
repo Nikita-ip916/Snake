@@ -8,6 +8,7 @@ using namespace sf;
 
 const int HEIGHT_MAP = 32;
 const int WIDTH_MAP = 32;
+const int TILE_SIZE = 64;
 
 String TileMap[HEIGHT_MAP] = {
         "00000000000000000000000000000000", "0                              0",
@@ -30,22 +31,16 @@ String TileMap[HEIGHT_MAP] = {
 
 void clearStoppers()
 {
-    for (int i = 1; i < WIDTH_MAP - 1; i++) {
-        for (int j = 1; j < HEIGHT_MAP - 1; j++) {
-            if (TileMap[j][i] == '-') {
+    for (int i = 1; i < WIDTH_MAP - 1; i++)
+        for (int j = 1; j < HEIGHT_MAP - 1; j++)
+            if (TileMap[j][i] == '-')
                 TileMap[j][i] = ' ';
-            }
-        }
-    }
 }
 void clearMap()
 {
-    for (int i = 1; i < WIDTH_MAP - 1; i++) {
-        for (int j = 1; j < HEIGHT_MAP - 1; j++) {
-            if (TileMap[j][i] != '0') {
+    for (int i = 1; i < WIDTH_MAP - 1; i++)
+        for (int j = 1; j < HEIGHT_MAP - 1; j++)
+            if (TileMap[j][i] != '0')
                 TileMap[j][i] = ' ';
-            }
-        }
-    }
 }
 #endif
