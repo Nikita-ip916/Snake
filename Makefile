@@ -20,3 +20,9 @@ runprog:
 clean:
 		rm -rf bin/$(OUT)
 		rm -rf build/src/*.o
+
+test: src/testSQL.cpp
+		$(CXX) $(CXXFLAGS) -o bin/sqltest.exe $< -I /usr/include/mysql -L /usr/lib/mysql -lmysqlclient
+
+runtest:
+		./bin/sqltest.exe
