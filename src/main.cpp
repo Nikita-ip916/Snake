@@ -1,4 +1,5 @@
 #include "SFML/Graphics.hpp"
+#include "leaderboard.hpp"
 #include "player.hpp"
 #include "view.hpp"
 #include <iomanip>
@@ -224,6 +225,8 @@ int main()
                                 view.getCenter().x - 450,
                                 view.getCenter().y - 150);
                         window.draw(gameOver);
+                        window.close();
+                        resultSaving(p1.score);
                     }
                 }
 
