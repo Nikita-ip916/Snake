@@ -28,12 +28,13 @@ void resultSaving(int Score)
     do {
         cin >> Name;
     } while (Name.size() > 15);
-
+    if (!mysql_init(&mysql))
+        exiterr(7);
     if (!(mysql_real_connect(
                 &mysql,
                 "localhost",
-                "stud",
-                "sergeichnik",
+                "nikich",
+                "6cRaP9_YE",
                 "snake",
                 3306,
                 NULL,
