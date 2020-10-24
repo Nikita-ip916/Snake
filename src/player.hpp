@@ -1,5 +1,3 @@
-#include "map.hpp"
-#include "view.hpp"
 #include <SFML/Graphics.hpp>
 #include <iostream>
 #include <math.h>
@@ -14,6 +12,13 @@ using namespace sf;
 #ifndef PLAYER_HPP
 #define PLAYER_HPP
 
+View view, viewP2;
+const int HEIGHT_MAP = 32;
+const int WIDTH_MAP = 32;
+const int TILE_SIZE = 64;
+const int SEPARATOR_WIDTH = 12;
+const float MOVE_DELAY = 600;
+
 struct Tile {
     string name;
     enum { left, right, up, down } state;
@@ -23,92 +28,86 @@ struct Tile {
 
 class Object {
 protected:
-    int w, h;
-    Texture texture;
-    Sprite sprite;
+    static Texture texture;
+    static Sprite sprite;
 
 public:
+    static Sprite& getSprite();
+    static Texture& getTexture();
 };
 
 class Player : public Object {
 protected:
+    Clock clockMove, clockBonus;
+    bool bonusClockRemain;
+    ostringstream bonus, score;
+    float currentMoveDelay;
+    int bonusTime, currentBonusTime;
+    int w, h;
     vector<Tile> body;
-    enum { wasd, arrows } controls;
     float speed;
     int score;
-    bool life, bonusTimer, eaten, winner;
-    Player(Image& image, int x, int y, int w = TILE_SIZE, int h = TILE_SIZE)
-        : score(0),
-          speed(1),
-          w(w),
-          h(h),
-          bonusTimer(false),
-          eaten(false),
-          winner(false),
-          life(true),
-          controls(wasd)
-    {
-        Tile tile;
-        tile.x = x;
-        tile.y = y;
-        tile.name = "Head";
-        tile.state = Tile::right;
-        body.push_back(tile);
-        tile.x = x - w;
-        tile.name = "Tail";
-        tile.state = Tile::right;
-        body.push_back(tile);
-        texture.loadFromImage(image);
-        sprite.setTexture(texture);
-        sprite.setOrigin(w / 2, h / 2);
-    }
+    bool life, bonusStart, eaten, winner;
     bool midUpdate(float currentMoveDelay);
-    void setTemps(int& tempX, int& tempY);
+    void setTemps(int& tempX, int& tempY, int halfW, int halfH);
 
 public:
+    Player(Image& image, int x, int y, int w, int h);
     virtual void control();
+    virtual void changeView(int screenW, int screenH);
     virtual void setPlayerCoordinateForView(int screenW, int screenH);
+
+    int getW();
+    int getH();
+    vector<Tile>& getBody();
+    float getSpeed();
+    int getScore();
+    bool getLife();
+    bool getbonusStart();
+    bool getEaten();
+    bool getWinner();
+
     void growth();
-    void checkCollisionWithMap(Bonus booster, Bonus slower, Bonus apple);
-    void checkCollisionWithMap(
-            Bonus booster,
-            Bonus slower,
-            Bonus apple,
-            vector<Tile>& oppositeBody);
+    void checkCollisionWithMap(Map map);
+    void checkCollisionWithMap(Map map, vector<Tile>& oppositeBody);
     void checkCollisionWithBody();
-    void checkCollisionWithBody(vector<Tile> oppositeBody);
-    bool update(float currentMoveDelay);
-    bool update(float currentMoveDelay, vector<Tile> oppositeBody);
+    void checkCollisionWithBody(vector<Tile>& oppositeBody);
+    bool update(float currentMoveDelay, Map map);
+    bool update(float currentMoveDelay, Map map, vector<Tile>& oppositeBody);
     void setBodySprite(unsigned int i);
 };
 
 class Player1 : public Player {
 public:
-    Player1(Image& image, int x, int y, int w, int h)
-    {
-        Player(image, x, y, w, h);
-    }
+    Player1(Image& image, int x, int y, int w, int h);
+    virtual void changeView(int screenW, int screenH);
     virtual void setPlayerCoordinateForView(int screenW, int screenH);
 };
 
 class Player2 : public Player {
 public:
-    Player2(Image& image, int x, int y, int w, int h) controls(arrows)
-    {
-        Player(image, x, y, w, h);
-        sprite.setColor(Color::Magenta);
-    }
+    Player2(Image& image, int x, int y, int w, int h);
     virtual void control();
+    virtual void changeView(int screenW, int screenH);
     virtual void setPlayerCoordinateForView(int screenW, int screenH);
 };
 
-class Bonus : public Object {
+class Map : public Object {
 protected:
-    char bonusType;
+    String TileMap[HEIGHT_MAP];
 
 public:
-    Bonus(char bonusType) : bonusType(bonusType);
-    void randomMapGenerate(vector<Tile>& body, vector<Tile>& oppositeBody);
+    Map();
+    void randomMapGenerate(char bonusType, vector<Tile>& body, int countBonus);
+    void randomMapGenerate(
+            char bonusType,
+            vector<Tile>& body,
+            vector<Tile>& oppositeBody,
+            int countBonus);
+    void clearSlowers(int count);
+    void clearMap();
+    String& getMap();
 }
 
+#include "methods.hpp"
 #endif
