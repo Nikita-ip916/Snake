@@ -23,7 +23,8 @@ Player::Player(Image& image, int x, int y, int w = TILE_SIZE, int h = TILE_SIZE)
       bonusStart(false),
       eaten(false),
       winner(false),
-      life(true)
+      life(true),
+      bonusClockRemain(false)
 {
     Tile tile;
     tile.x = x;
@@ -97,6 +98,22 @@ Sprite& Object::getSprite()
 Texture& Object::getTexture()
 {
     return texture;
+}
+Clock& Player::getClockMove()
+{
+    return clockMove;
+}
+Clock& Player::getClockBonus()
+{
+    return clockBonus;
+}
+bool& Player::getBonusClockRemain()
+{
+    return bonusClockRemain;
+}
+int& Player::getBonusTime()
+{
+    return bonusTime;
 }
 int Player::getW()
 {
@@ -291,8 +308,10 @@ bool Player::midUpdate(float currentMoveDelay)
     }
 }
 
-bool Player::update(float currentMoveDelay, Map map)
+bool Player::update(Map& map)
 {
+    float currentMoveDelay = clockMove.getElapsedTime().asMilliseconds();
+
     if (life)
         control();
     if (life && currentMoveDelay * speed > MOVE_DELAY) {
@@ -303,8 +322,9 @@ bool Player::update(float currentMoveDelay, Map map)
     setPlayerCoordinateForView();
     return isMoved;
 }
-bool Player::update(float currentMoveDelay, Map map, vector<Tile>& oppositeBody)
+bool Player::update(Map& map, vector<Tile>& oppositeBody)
 {
+    float currentMoveDelay = clockMove.getElapsedTime().asMilliseconds();
     if (life)
         control();
     if (life && currentMoveDelay * speed > MOVE_DELAY) {

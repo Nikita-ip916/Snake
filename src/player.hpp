@@ -40,9 +40,11 @@ class Player : public Object {
 protected:
     Clock clockMove, clockBonus;
     bool bonusClockRemain;
-    ostringstream bonus, score;
-    float currentMoveDelay;
-    int bonusTime, currentBonusTime;
+    // рабочие ostringstream bonus, score;
+    // рабочие Text bonusText, scoreText;
+    // рабочий float currentMoveDelay;
+    // рабочий int currentBonusTime;
+    int bonusTime;
     int w, h;
     vector<Tile> body;
     float speed;
@@ -57,6 +59,11 @@ public:
     virtual void changeView(int screenW, int screenH);
     virtual void setPlayerCoordinateForView(int screenW, int screenH);
 
+    Clock& getClockMove();
+    Clock& getClockBonus();
+    bool& getBonusClockRemain();
+    int& getBonusTime();
+
     int getW();
     int getH();
     vector<Tile>& getBody();
@@ -68,12 +75,12 @@ public:
     bool getWinner();
 
     void growth();
-    void checkCollisionWithMap(Map map);
-    void checkCollisionWithMap(Map map, vector<Tile>& oppositeBody);
+    void checkCollisionWithMap(Map& map);
+    void checkCollisionWithMap(Map& map, vector<Tile>& oppositeBody);
     void checkCollisionWithBody();
     void checkCollisionWithBody(vector<Tile>& oppositeBody);
-    bool update(float currentMoveDelay, Map map);
-    bool update(float currentMoveDelay, Map map, vector<Tile>& oppositeBody);
+    bool update(Map& map);
+    bool update(Map& map, vector<Tile>& oppositeBody);
     void setBodySprite(unsigned int i);
 };
 
