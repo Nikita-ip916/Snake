@@ -10,7 +10,7 @@
 
 using namespace std;
 using namespace sf;
-
+RenderWindow window;
 int main()
 {
     const int defaultTextSize = 50;
@@ -26,7 +26,7 @@ int main()
     } else if (plNumber == "two" || plNumber == "два") {
         plNumber = "2";
     }
-    RenderWindow window(VideoMode(1920, 1080), "Snake 2020", Style::Fullscreen);
+    window.create(VideoMode(1920, 1080), "Snake 2020", Style::Fullscreen);
     window.setVerticalSyncEnabled(true);
     changeView(plNumber);
 
@@ -54,69 +54,69 @@ int main()
         Player p2(tiles, plNumber, "Player2", 512, 1280, 64, 64);
 
         Clock clockMove[3], clockBonus[3];
-        bool bonusClock[3];
-        bonusClock[1] = bonusClock[2] = false;
+        bool bonusClockRemain[3];
+        bonusClockRemain[1] = bonusClockRemain[2] = false;
         clearMap();
         p1.randomMapGenerate('+');
         p1.randomMapGenerate('a');
 
         while (window.isOpen()) {
-            ostringstream bonus[3], score[3];
+            /*ostringstream bonus[3], score[3];
             float currentMoveDelay[3];
             currentMoveDelay[1]
                     = clockMove[1].getElapsedTime().asMilliseconds();
             currentMoveDelay[2]
                     = clockMove[2].getElapsedTime().asMilliseconds();
-            int bonusTime[3], currentBonusTime[3];
-            Event event;
+            int bonusTime[3], currentBonusTime[3];*/
+            /*Event event;
             while (window.pollEvent(event))
                 if (event.type == Event::Closed)
                     window.close();
             if (Keyboard::isKeyPressed(Keyboard::Escape))
                 window.close();
             if (Keyboard::isKeyPressed(Keyboard::R))
-                break;
+                break;*/
             score[1] << setfill('0') << setw(2) << p1.score;
-            p1.oppositeBody.clear();
+            /*p1.oppositeBody.clear();
             for (unsigned i = 0; i < p2.body.size(); i++) {
                 Player::Tile tile;
                 tile.x = p2.body[i].x;
                 tile.y = p2.body[i].y;
                 p1.oppositeBody.push_back(tile);
-            }
-            if (p1.update(currentMoveDelay[1])) {
+            }*/
+            /*if (p1.update(currentMoveDelay[1])) {
                 p1.randomMapGenerate('-');
                 clockMove[1].restart();
-            }
+            }*/
             if (plNumber == "2") {
                 score[2] << setfill('0') << setw(2) << p2.score;
-                p2.oppositeBody.clear();
+                /*p2.oppositeBody.clear();
                 for (unsigned i = 0; i < p1.body.size(); i++) {
                     Player::Tile tile;
                     tile.x = p1.body[i].x;
                     tile.y = p1.body[i].y;
                     p2.oppositeBody.push_back(tile);
-                }
-                if (p1.life)
+                }*/
+                /*if (p1.life)
                     if (p2.update(currentMoveDelay[2])) {
                         p2.randomMapGenerate('-');
                         clockMove[2].restart();
-                    }
+                    }*/
             }
-            if (p1.bonusTimer) {
+            if (p1.bonusStart) {
                 bonusTime[1] = 10;
-                bonusClock[1] = true;
+                bonusClockRemain[1] = true;
                 clockBonus[1].restart();
-                p1.bonusTimer = false;
+                p1.bonusStart = false;
             }
-            if (p2.bonusTimer) {
+            if (p2.bonusStart) {
                 bonusTime[2] = 10;
-                bonusClock[2] = true;
+                bonusClockRemain[2] = true;
                 clockBonus[2].restart();
-                p2.bonusTimer = false;
+                p2.bonusStart = false;
             }
             for (int i = 1; i <= 2; i++) {
-                if (bonusClock[i]) {
+                if (bonusClockRemain[i]) {
                     currentBonusTime[i]
                             = clockBonus[i].getElapsedTime().asSeconds();
                 } else {
@@ -129,12 +129,12 @@ int main()
             if (currentBonusTime[1] >= bonusTime[1]) {
                 p1.speed = 1;
                 bonusTime[1] = 0;
-                bonusClock[1] = false;
+                bonusClockRemain[1] = false;
             }
             if (currentBonusTime[2] >= bonusTime[2]) {
                 p2.speed = 1;
                 bonusTime[2] = 0;
-                bonusClock[2] = false;
+                bonusClockRemain[2] = false;
             }
             window.clear(Color(77, 64, 37));
 
