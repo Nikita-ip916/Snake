@@ -1,4 +1,5 @@
 #include <SFML/Graphics.hpp>
+#include <iomanip>
 #include <iostream>
 #include <math.h>
 #include <sstream>
@@ -133,15 +134,15 @@ float Player::getSpeed()
 }
 int Player::getScore()
 {
-    return speed;
+    return score;
 }
 bool Player::getLife()
 {
     return life;
 }
-bool Player::getbonusStart()
+bool Player::getBonusStart()
 {
-    return bonusTime;
+    return bonusStart;
 }
 bool Player::getEaten()
 {
@@ -151,9 +152,9 @@ bool Player::getWinner()
 {
     return winner;
 }
-String& Map::getMap()
+String*& Map::getMap()
 {
-    return TileMap;
+    return TileMap[];
 }
 ////////////////////////////////////////////////////////////////////// Controls
 void Player::control()
@@ -335,45 +336,122 @@ bool Player::update(Map& map, vector<Tile>& oppositeBody)
     setPlayerCoordinateForView();
     return isMoved;
 }
-/////////////////////////////////////////////////////////// Body sprites Setter
-void Player::setBodySprite(insigned int i)
+//////////////////////////////////////////////////////////////// Bonus setter
+void Player::setBonusTimer()
 {
-    if (body[i].name == "Head") {
-        sprite.setTextureRect(IntRect(0, 0, 64, 64));
-    } else if (body[i].name == "Body") {
-        if (body[i].state == body[i - 1].state) {
-            sprite.setTextureRect(IntRect(64, 0, 64, 64));
-        } else if (
-                (body[i].state == Player::Tile::left
-                 && body[i - 1].state == Player::Tile::up)
-                || (body[i].state == Player::Tile::up
-                    && body[i - 1].state == Player::Tile::right)
-                || (body[i].state == Player::Tile::right
-                    && body[i - 1].state == Player::Tile::down)
-                || (body[i].state == Player::Tile::down
-                    && body[i - 1].state == Player::Tile::left)) {
-            sprite.setTextureRect(IntRect(192, 0, 64, 64));
-        } else {
-            sprite.setTextureRect(IntRect(128, 0, 64, 64));
+    if (bonusStart) {
+        bonusTime = BONUS_TIME;
+        bonusClockRemain = true;
+        clockBonus.restart();
+        bonusStart = false;
+    }
+    if (bonusClockRemain) {
+        currentBonusTime = clockBonus.getElapsedTime().asSeconds();
+    } else {
+        bonusTime = 0;
+    }
+    if (currentBonusTime >= bonusTime) {
+        speed = 1;
+        bonusTime = 0;
+        bonusClockRemain = false;
+    }
+}
+////////////////////////////////////////////////////////////// Drawers
+void Player::draw()
+{
+    for (unsigned int i = 0; i < body.size(); i++) {
+        if (body[i].name == "Head") {
+            sprite.setTextureRect(IntRect(0, 0, 64, 64));
+        } else if (body[i].name == "Body") {
+            if (body[i].state == body[i - 1].state) {
+                sprite.setTextureRect(IntRect(64, 0, 64, 64));
+            } else if (
+                    (body[i].state == Player::Tile::left
+                     && body[i - 1].state == Player::Tile::up)
+                    || (body[i].state == Player::Tile::up
+                        && body[i - 1].state == Player::Tile::right)
+                    || (body[i].state == Player::Tile::right
+                        && body[i - 1].state == Player::Tile::down)
+                    || (body[i].state == Player::Tile::down
+                        && body[i - 1].state == Player::Tile::left)) {
+                sprite.setTextureRect(IntRect(192, 0, 64, 64));
+            } else {
+                sprite.setTextureRect(IntRect(128, 0, 64, 64));
+            }
+        } else if (body[i].name == "Tail") {
+            sprite.setTextureRect(IntRect(256, 0, 64, 64));
         }
-    } else if (body[i].name == "Tail") {
-        sprite.setTextureRect(IntRect(256, 0, 64, 64));
-    }
-    switch (body[i].state) {
-    case Player::Tile::left:
-        sprite.setRotation(180);
-        break;
-    case Player::Tile::right:
+        switch (body[i].state) {
+        case Player::Tile::left:
+            sprite.setRotation(180);
+            break;
+        case Player::Tile::right:
+            sprite.setRotation(0);
+            break;
+        case Player::Tile::up:
+            sprite.setRotation(270);
+            break;
+        case Player::Tile::down:
+            sprite.setRotation(90);
+            break;
+        }
+        sprite.setPosition(body[i].x + w / 2, body[i].y + h / 2);
+        window.draw(sprite);
         sprite.setRotation(0);
-        break;
-    case Player::Tile::up:
-        sprite.setRotation(270);
-        break;
-    case Player::Tile::down:
-        sprite.setRotation(90);
-        break;
     }
-    sprite.setPosition(body[i].x + w / 2, body[i].y + h / 2);
+}
+void Player::draw(int screenW, int screenH)
+{
+    screenW = 30;
+    screenH = 15;
+    Text scoreText("", font, DEFAULT_TEXT_SIZE),
+            bonusText("", font, DEFAULT_TEXT_SIZE);
+    scoreText.setFillColor(Color(77, 64, 37));
+    bonusText.setFillColor(Color(77, 64, 37));
+
+    ostringstream scoreStream, bonusStream;
+    scoreStream << setfill('0') << setw(2) << score;
+
+    scoreText.setString(L"Яблок собрано: " + scoreStream.str());
+    // score[1].str("");
+    scoreText.setPosition(view.getCenter().x - 890, view.getCenter().y - 470);
+    window.draw(scoreText);
+    if (life && bonusTime > 0) {
+        bonusStream << setfill('0') << setw(2) << 10 - currentBonusTime;
+        bonusText.setString(L"Действие бонуса: " + bonusStream.str());
+        bonus[1].str("");
+        bonusText.setPosition(
+                view.getCenter().x - 890, view.getCenter().y - 406);
+        window.draw(bonusText);
+    } else if (!life) {
+        sprite.setColor(Color::Black);
+        gameOver.setPosition(
+                view.getCenter().x - 450, view.getCenter().y - 150);
+        window.draw(gameOver);
+    }
+}
+void Map::draw()
+{
+    for (int i = 0; i < HEIGHT_MAP; i++)
+        for (int j = 0; j < WIDTH_MAP; j++) {
+            if (TileMap[i][j] == ' ') {
+                sprite.setTextureRect(IntRect(320, 0, 64, 64));
+            }
+            if (TileMap[i][j] == 'a') {
+                sprite.setTextureRect(IntRect(448, 0, 64, 64));
+            }
+            if (TileMap[i][j] == '0') {
+                sprite.setTextureRect(IntRect(384, 0, 64, 64));
+            }
+            if (TileMap[i][j] == '+') {
+                sprite.setTextureRect(IntRect(576, 0, 64, 64));
+            }
+            if (TileMap[i][j] == '-') {
+                sprite.setTextureRect(IntRect(512, 0, 64, 64));
+            }
+            sprite.setPosition(j * 64, i * 64);
+            window.draw(sprite);
+        }
 }
 ////////////////////////////////////////////////////////////// View coordinates
 void Player::setTemps(int& tempX, int& tempY, int halfW, int halfH)
