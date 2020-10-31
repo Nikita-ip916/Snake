@@ -45,19 +45,20 @@ public:
 
 class Map : public Object {
 protected:
-    String TileMap[HEIGHT_MAP];
+    String* TileMap;
 
 public:
-    Map();
-    void randomMapGenerate(char bonusType, vector<Tile>& body, int countBonus);
+    Map(Image& image);
+    void randomMapGenerate(
+            char bonusType, vector<Tile>& playerBody, int countBonus = 1);
     void randomMapGenerate(
             char bonusType,
-            vector<Tile>& body,
+            vector<Tile>& playerBody,
             vector<Tile>& oppositeBody,
-            int countBonus);
-    void clearSlowers(int count);
+            int countBonus = 1);
+    void clearSlowers(int count = -1);
     void clearMap();
-    String*& getMap();
+    String* getMap();
 
     void draw();
 };
@@ -65,22 +66,22 @@ public:
 class Player : public Object {
 protected:
     Clock clockMove, clockBonus;
+    int w, h;
     bool bonusClockRemain;
     // рабочие ostringstream bonus, score;
     // рабочие Text bonusText, scoreText;
     // рабочий float currentMoveDelay; +++
     // рабочий int currentBonusTime; +++
-    int bonusTime;
-    int w, h;
-    vector<Tile> body;
+    int bonusTime, bonusLeft;
     float speed;
     int score;
     bool life, bonusStart, eaten, winner;
+    vector<Tile> body;
     bool midUpdate(float currentMoveDelay);
-    void setTemps(int& tempX, int& tempY, int halfW, int halfH);
+    void setTemps(float& tempX, float& tempY, int halfW, int halfH);
 
 public:
-    Player(Image& image, int x, int y, int w, int h);
+    Player(Image& image, int x, int y, int w = TILE_SIZE, int h = TILE_SIZE);
     virtual void control();
     virtual void changeView(int screenW, int screenH);
     virtual void setPlayerCoordinateForView(int screenW, int screenH);
@@ -95,18 +96,19 @@ public:
     vector<Tile>& getBody();
     float getSpeed();
     int getScore();
-    bool getLife();
+    int getBonusLeft();
+    bool& getLife();
     bool getBonusStart();
     bool getEaten();
-    bool getWinner();
+    bool& getWinner();
 
     void growth();
     void checkCollisionWithMap(Map& map);
     void checkCollisionWithMap(Map& map, vector<Tile>& oppositeBody);
     void checkCollisionWithBody();
     void checkCollisionWithBody(vector<Tile>& oppositeBody);
-    bool update(Map& map);
-    bool update(Map& map, vector<Tile>& oppositeBody);
+    bool update(Map& map, int screenW, int screenH);
+    bool update(Map& map, vector<Tile>& oppositeBody, int screenW, int screenH);
 
     void setBonusTimer();
 
@@ -116,14 +118,14 @@ public:
 
 class Player1 : public Player {
 public:
-    Player1(Image& image, int x, int y, int w, int h);
+    Player1(Image& image, int x, int y, int w = TILE_SIZE, int h = TILE_SIZE);
     virtual void changeView(int screenW, int screenH);
     virtual void setPlayerCoordinateForView(int screenW, int screenH);
 };
 
 class Player2 : public Player {
 public:
-    Player2(Image& image, int x, int y, int w, int h);
+    Player2(Image& image, int x, int y, int w = TILE_SIZE, int h = TILE_SIZE);
     virtual void control();
     virtual void changeView(int screenW, int screenH);
     virtual void setPlayerCoordinateForView(int screenW, int screenH);

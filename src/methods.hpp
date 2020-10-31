@@ -16,16 +16,18 @@ using namespace sf;
 Texture Object::texture;
 Sprite Object::sprite;
 ////////////////////////////////////////////////////////////////// Constructors
-Player::Player(Image& image, int x, int y, int w = TILE_SIZE, int h = TILE_SIZE)
-    : score(0),
-      speed(1),
-      w(w),
-      h(h),
-      bonusStart(false),
-      eaten(false),
-      winner(false),
-      life(true),
-      bonusClockRemain(false)
+Player::Player(Image& image, int x, int y, int w, int h)
+    : w{w},
+      h{h},
+      bonusClockRemain{false},
+      bonusTime{0},
+      bonusLeft{0},
+      speed{1},
+      score{0},
+      life{true},
+      bonusStart{false},
+      eaten{false},
+      winner{false}
 {
     Tile tile;
     tile.x = x;
@@ -41,20 +43,22 @@ Player::Player(Image& image, int x, int y, int w = TILE_SIZE, int h = TILE_SIZE)
     sprite.setTexture(texture);
     sprite.setOrigin(w / 2, h / 2);
 }
-Player1::Player1(
-        Image& image, int x, int y, int w = TILE_SIZE, int h = TILE_SIZE)
+Player1::Player1(Image& image, int x, int y, int w, int h)
 {
     Player(image, x, y, w, h);
 }
-Player2::Player2(
-        Image& image, int x, int y, int w = TILE_SIZE, int h = TILE_SIZE)
+Player2::Player2(Image& image, int x, int y, int w, int h)
 {
     Player(image, x, y, w, h);
     sprite.setColor(Color::Magenta);
 }
 Map::Map(Image& image)
 {
-    TileMap = {
+    TileMap = new String[HEIGHT_MAP];
+    TileMap[0] = TileMap[HEIGHT_MAP - 1] = "00000000000000000000000000000000";
+    for (int i = 1; i < HEIGHT_MAP - 1; i++)
+        TileMap[i] = "0                              0";
+    /*{
             "00000000000000000000000000000000",
             "0                              0",
             "0                              0",
@@ -87,7 +91,7 @@ Map::Map(Image& image)
             "0                              0",
             "0                              0",
             "00000000000000000000000000000000",
-    };
+    };*/
     texture.loadFromImage(image);
     sprite.setTexture(texture);
 }
@@ -136,7 +140,11 @@ int Player::getScore()
 {
     return score;
 }
-bool Player::getLife()
+int Player::getBonusLeft()
+{
+    return bonusLeft;
+}
+bool& Player::getLife()
 {
     return life;
 }
@@ -148,13 +156,13 @@ bool Player::getEaten()
 {
     return eaten;
 }
-bool Player::getWinner()
+bool& Player::getWinner()
 {
     return winner;
 }
-String*& Map::getMap()
+String* Map::getMap()
 {
-    return TileMap[];
+    return TileMap;
 }
 ////////////////////////////////////////////////////////////////////// Controls
 void Player::control()
@@ -211,7 +219,7 @@ void Player::checkCollisionWithMap(Map& map)
     eaten = false;
     int i = body[0].y / 64;
     int j = body[0].x / 64;
-    String TileMap = map.getMap();
+    String* TileMap = map.getMap();
     if (TileMap[i][j] == '0') {
         life = false;
     } else if (TileMap[i][j] == '+') {
@@ -238,14 +246,14 @@ void Player::checkCollisionWithMap(Map& map, vector<Tile>& oppositeBody)
     eaten = false;
     int i = body[0].y / 64;
     int j = body[0].x / 64;
-    String TileMap = map.getMap();
+    String* TileMap = map.getMap();
     if (TileMap[i][j] == '0') {
         life = false;
     } else if (TileMap[i][j] == '+') {
         speed = 2;
         bonusStart = true;
         TileMap[i][j] = ' ';
-        map.randomMapGenerate('+', body, oppositeBody);
+        map.randomMapGenerate('+', body, oppositeBody, 1);
     } else if (TileMap[i][j] == '-') {
         speed = 0.5;
         bonusStart = true;
@@ -256,8 +264,8 @@ void Player::checkCollisionWithMap(Map& map, vector<Tile>& oppositeBody)
         eaten = true;
         TileMap[i][j] = ' ';
         growth();
-        map.randomMapGenerate('a', body, oppositeBody);
-        map.randomMapGenerate('-', body, oppositeBody);
+        map.randomMapGenerate('a', body, oppositeBody, 1);
+        map.randomMapGenerate('-', body, oppositeBody, 1);
     }
 }
 //////////////////////////////////////////////////////////////// Body Collision
@@ -307,9 +315,10 @@ bool Player::midUpdate(float currentMoveDelay)
         }
         isMoved = true;
     }
+    return isMoved;
 }
 
-bool Player::update(Map& map)
+bool Player::update(Map& map, int screenW, int screenH)
 {
     float currentMoveDelay = clockMove.getElapsedTime().asMilliseconds();
 
@@ -320,10 +329,11 @@ bool Player::update(Map& map)
         checkCollisionWithBody();
     }
     bool isMoved = midUpdate(currentMoveDelay);
-    setPlayerCoordinateForView();
+    setPlayerCoordinateForView(screenW, screenH);
     return isMoved;
 }
-bool Player::update(Map& map, vector<Tile>& oppositeBody)
+bool Player::update(
+        Map& map, vector<Tile>& oppositeBody, int screenW, int screenH)
 {
     float currentMoveDelay = clockMove.getElapsedTime().asMilliseconds();
     if (life)
@@ -333,23 +343,25 @@ bool Player::update(Map& map, vector<Tile>& oppositeBody)
         checkCollisionWithBody(oppositeBody);
     }
     bool isMoved = midUpdate(currentMoveDelay);
-    setPlayerCoordinateForView();
+    setPlayerCoordinateForView(screenW, screenH);
     return isMoved;
 }
 //////////////////////////////////////////////////////////////// Bonus setter
 void Player::setBonusTimer()
 {
+    int currentBonusTime = 0;
     if (bonusStart) {
         bonusTime = BONUS_TIME;
         bonusClockRemain = true;
         clockBonus.restart();
         bonusStart = false;
     }
-    if (bonusClockRemain) {
+    if (bonusClockRemain)
         currentBonusTime = clockBonus.getElapsedTime().asSeconds();
-    } else {
+    else
         bonusTime = 0;
-    }
+    if (bonusTime > 0)
+        bonusLeft = 10 - currentBonusTime;
     if (currentBonusTime >= bonusTime) {
         speed = 1;
         bonusTime = 0;
@@ -366,14 +378,14 @@ void Player::draw()
             if (body[i].state == body[i - 1].state) {
                 sprite.setTextureRect(IntRect(64, 0, 64, 64));
             } else if (
-                    (body[i].state == Player::Tile::left
-                     && body[i - 1].state == Player::Tile::up)
-                    || (body[i].state == Player::Tile::up
-                        && body[i - 1].state == Player::Tile::right)
-                    || (body[i].state == Player::Tile::right
-                        && body[i - 1].state == Player::Tile::down)
-                    || (body[i].state == Player::Tile::down
-                        && body[i - 1].state == Player::Tile::left)) {
+                    (body[i].state == Tile::left
+                     && body[i - 1].state == Tile::up)
+                    || (body[i].state == Tile::up
+                        && body[i - 1].state == Tile::right)
+                    || (body[i].state == Tile::right
+                        && body[i - 1].state == Tile::down)
+                    || (body[i].state == Tile::down
+                        && body[i - 1].state == Tile::left)) {
                 sprite.setTextureRect(IntRect(192, 0, 64, 64));
             } else {
                 sprite.setTextureRect(IntRect(128, 0, 64, 64));
@@ -382,16 +394,16 @@ void Player::draw()
             sprite.setTextureRect(IntRect(256, 0, 64, 64));
         }
         switch (body[i].state) {
-        case Player::Tile::left:
+        case Tile::left:
             sprite.setRotation(180);
             break;
-        case Player::Tile::right:
+        case Tile::right:
             sprite.setRotation(0);
             break;
-        case Player::Tile::up:
+        case Tile::up:
             sprite.setRotation(270);
             break;
-        case Player::Tile::down:
+        case Tile::down:
             sprite.setRotation(90);
             break;
         }
@@ -413,13 +425,13 @@ void Player::draw(int screenW, int screenH)
     scoreStream << setfill('0') << setw(2) << score;
 
     scoreText.setString(L"Яблок собрано: " + scoreStream.str());
-    // score[1].str("");
+    // scoreStream.str("");
     scoreText.setPosition(view.getCenter().x - 890, view.getCenter().y - 470);
     window.draw(scoreText);
     if (life && bonusTime > 0) {
-        bonusStream << setfill('0') << setw(2) << 10 - currentBonusTime;
+        bonusStream << setfill('0') << setw(2) << bonusLeft;
         bonusText.setString(L"Действие бонуса: " + bonusStream.str());
-        bonus[1].str("");
+        // bonusStream.str("");
         bonusText.setPosition(
                 view.getCenter().x - 890, view.getCenter().y - 406);
         window.draw(bonusText);
@@ -454,7 +466,7 @@ void Map::draw()
         }
 }
 ////////////////////////////////////////////////////////////// View coordinates
-void Player::setTemps(int& tempX, int& tempY, int halfW, int halfH)
+void Player::setTemps(float& tempX, float& tempY, int halfW, int halfH)
 {
     if (body[0].x < halfW)
         tempX = halfW;
@@ -532,14 +544,14 @@ void Player2::changeView(int screenW, int screenH)
 }
 /////////////////////////////////////////////////////////// Random Map Generate
 void Map::randomMapGenerate(
-        char bonusType, vector<Tile>& playerBody, int countBonus = 1)
+        char bonusType, vector<Tile>& playerBody, int countBonus)
 {
     srand(time(0));
     while (countBonus > 0) {
         bool generate = true;
         int randomElementX = 1 + rand() % (WIDTH_MAP - 1);
         int randomElementY = 1 + rand() % (HEIGHT_MAP - 1);
-        for (unsigned int i = 0; i < body.size(); i++) {
+        for (unsigned int i = 0; i < playerBody.size(); i++) {
             if (playerBody[i].x == randomElementX * 64
                 && playerBody[i].y == randomElementY * 64)
                 generate = false;
@@ -554,14 +566,14 @@ void Map::randomMapGenerate(
         char bonusType,
         vector<Tile>& playerBody,
         vector<Tile>& oppositeBody,
-        int countBonus = 1)
+        int countBonus)
 {
     srand(time(0));
     while (countBonus > 0) {
         bool generate = true;
         int randomElementX = 1 + rand() % (WIDTH_MAP - 1);
         int randomElementY = 1 + rand() % (HEIGHT_MAP - 1);
-        for (unsigned int i = 0; i < body.size(); i++) {
+        for (unsigned int i = 0; i < playerBody.size(); i++) {
             if (playerBody[i].x == randomElementX * 64
                 && playerBody[i].y == randomElementY * 64)
                 generate = false;
@@ -578,7 +590,7 @@ void Map::randomMapGenerate(
     }
 }
 ///////////////////////////////////////////////////////////// Map Clear Methods
-void Map::clearSlowers(int count = -1)
+void Map::clearSlowers(int count)
 {
     for (int i = 1; i < WIDTH_MAP - 1; i++)
         for (int j = 1; j < HEIGHT_MAP - 1; j++)

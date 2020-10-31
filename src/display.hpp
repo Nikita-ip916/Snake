@@ -13,6 +13,10 @@ using namespace sf;
 #ifndef DISPLAY_HPP
 #define DISPLAY_HPP
 
+void setParametrs(Map&, Player&, int, int);
+void setParametrs(Map&, Player**, int, int);
+void draw(int, int, Player**, int);
+
 void display(int screenW, int screenH, string plNumber)
 {
     window.create(VideoMode(screenW, screenH), "Snake 2020", Style::Fullscreen);
@@ -35,13 +39,13 @@ void display(int screenW, int screenH, string plNumber)
     gameWon.setStyle(Text::Bold);
 
     while (window.isOpen()) {
-        Map map;
+        Map map(tiles);
         if (plNumber == "1") {
             Player player(tiles, screenW / 4 / 64 * 64, screenW / 2 / 64 * 64);
             player.changeView(screenW, screenH);
             map.clearMap();
-            map.randomMapGenerate("+", player.getBody());
-            map.randomMapGenerate("a", player.getBody());
+            map.randomMapGenerate('+', player.getBody());
+            map.randomMapGenerate('a', player.getBody());
             while (window.isOpen()) {
                 Event event;
                 while (window.pollEvent(event))
@@ -52,7 +56,7 @@ void display(int screenW, int screenH, string plNumber)
                 if (Keyboard::isKeyPressed(Keyboard::R))
                     break;
 
-                setParametrs(map, player);
+                setParametrs(map, player, screenW, screenH);
                 window.setView(view);
                 map.draw();
                 player.draw();
@@ -69,9 +73,9 @@ void display(int screenW, int screenH, string plNumber)
             player[1]->changeView(screenW, screenH);
             map.clearMap();
             map.randomMapGenerate(
-                    "+", player[0].getBody(), player[1].getBody());
+                    '+', player[0]->getBody(), player[1]->getBody());
             map.randomMapGenerate(
-                    "a", player[0].getBody(), player[1].getBody());
+                    'a', player[0]->getBody(), player[1]->getBody());
             while (window.isOpen()) {
                 Event event;
                 while (window.pollEvent(event))
@@ -82,7 +86,7 @@ void display(int screenW, int screenH, string plNumber)
                 if (Keyboard::isKeyPressed(Keyboard::R))
                     break;
 
-                setParametrs(map, player);
+                setParametrs(map, player, screenW, screenH);
 
                 window.setView(view);
                 map.draw();
@@ -103,26 +107,26 @@ void display(int screenW, int screenH, string plNumber)
     }
 }
 ///////////////////////////////////////////////////////////////// Bonus Updates
-void setParametrs(Map& map, Player& player)
+void setParametrs(Map& map, Player& player, int screenW, int screenH)
 {
-    if (player.update(map)) {
+    if (player.update(map, screenW, screenH)) {
         map.randomMapGenerate('-', player.getBody());
-        player.getClockMove.restart();
+        player.getClockMove().restart();
     }
     player.setBonusTimer();
     window.clear();
 }
-void setParametrs(Map& map, Player** player)
+void setParametrs(Map& map, Player** player, int screenW, int screenH)
 {
-    if (player[0]->update(map, player[1]->getBody())) {
+    if (player[0]->update(map, player[1]->getBody(), screenW, screenH)) {
         map.randomMapGenerate('-', player[0]->getBody(), player[1]->getBody());
-        player[0]->getClockMove.restart();
+        player[0]->getClockMove().restart();
     }
     if (player[0]->getLife())
-        if (player[1]->update(map, player[0]->getBody())) {
+        if (player[1]->update(map, player[0]->getBody(), screenW, screenH)) {
             map.randomMapGenerate(
                     '-', player[1]->getBody(), player[0]->getBody());
-            player[1]->getClockMove.restart();
+            player[1]->getClockMove().restart();
         }
     player[0]->setBonusTimer();
     player[1]->setBonusTimer();
@@ -138,7 +142,7 @@ void draw(int screenW, int screenH, Player** player, int currentPlayer)
     bonusText.setFillColor(Color(77, 64, 37));
 
     ostringstream scoreStream, bonusStream;
-    scoreStream << setfill('0') << setw(2) << score;
+    scoreStream << setfill('0') << setw(2) << player[currentPlayer]->getScore();
 
     scoreText.setString(L"Яблок собрано: " + scoreStream.str());
     // scoreStream.str("");
@@ -147,8 +151,10 @@ void draw(int screenW, int screenH, Player** player, int currentPlayer)
     if (!player[1 - currentPlayer]->getLife()
         && !player[1 - currentPlayer]->getWinner()) {
         player[1 - currentPlayer]->getSprite().setColor(Color::Black);
-        player[currentPlayer]->getWinner() = true;
-        player[currentPlayer]->getLife() = false;
+        bool winner = player[currentPlayer]->getWinner();
+        bool life = player[currentPlayer]->getLife();
+        winner = true;
+        life = false;
     }
     if (player[currentPlayer]->getWinner()) {
         gameWon.setPosition(view.getCenter().x - 440, view.getCenter().y - 256);
@@ -156,6 +162,8 @@ void draw(int screenW, int screenH, Player** player, int currentPlayer)
     } else if (
             player[currentPlayer]->getLife()
             && player[currentPlayer]->getBonusTime() > 0) {
+        bonusStream << setfill('0') << setw(2)
+                    << player[currentPlayer]->getBonusLeft();
         bonusText.setString(L"Действие бонуса: " + bonusStream.str());
         // bonusStream.str("");
         bonusText.setPosition(
