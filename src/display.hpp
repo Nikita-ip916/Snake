@@ -19,7 +19,8 @@ void draw(int, int, Player**, int);
 
 void display(int screenW, int screenH, string plNumber)
 {
-    window.create(VideoMode(screenW, screenH), "Snake 2020", Style::Fullscreen);
+    window.create(
+            VideoMode(screenW, screenH), "Snake 2020" /*, Style::Fullscreen*/);
     window.setVerticalSyncEnabled(true);
 
     Image tiles;
@@ -28,20 +29,23 @@ void display(int screenW, int screenH, string plNumber)
 
     gameOver.setFont(font);
     gameOver.setString(L"    Игра\nокончена");
-    gameOver.setCharacterSize(DEFAULT_TEXT_SIZE * 4);
+    gameOver.setCharacterSize(screenW / 10);
     gameOver.setFillColor(Color::Red);
     gameOver.setStyle(Text::Bold);
 
     gameWon.setFont(font);
     gameWon.setString(L"      Вы\nпобедили");
-    gameWon.setCharacterSize(DEFAULT_TEXT_SIZE * 4);
+    gameWon.setCharacterSize(screenW / 10);
     gameWon.setFillColor(Color::Cyan);
     gameWon.setStyle(Text::Bold);
 
     while (window.isOpen()) {
         Map map(tiles);
         if (plNumber == "1") {
-            Player player(tiles, screenW / 4 / 64 * 64, screenW / 2 / 64 * 64);
+            Player player(
+                    tiles,
+                    screenW / 2 / TILE_SIZE * TILE_SIZE,
+                    screenH / 2 / TILE_SIZE * TILE_SIZE);
             player.changeView(screenW, screenH);
             map.clearMap();
             map.randomMapGenerate('+', player.getBody());
@@ -53,11 +57,19 @@ void display(int screenW, int screenH, string plNumber)
                         window.close();
                 if (Keyboard::isKeyPressed(Keyboard::Escape))
                     window.close();
-                if (Keyboard::isKeyPressed(Keyboard::R))
+                if (Keyboard::isKeyPressed(Keyboard::R)) {
+                    /*screenW = 640;
+                    screenH = 480;
+                    window.close();
+                    window.create(
+                            VideoMode(screenW, screenH),
+                            "Snake 2020" , Style::Fullscreen);*/
                     break;
+                }
 
                 setParametrs(map, player, screenW, screenH);
-                window.setView(view);
+
+                window.setView(view[0]);
                 map.draw();
                 player.draw();
                 player.draw(screenW, screenH);
@@ -66,9 +78,13 @@ void display(int screenW, int screenH, string plNumber)
         } else if (plNumber == "2") {
             Player** player = new Player*[2];
             player[0] = new Player1(
-                    tiles, screenW / 4 / 64 * 64, screenW / 2 / 64 * 64);
+                    tiles,
+                    screenW / 4 / TILE_SIZE * TILE_SIZE,
+                    screenH / 2 / TILE_SIZE * TILE_SIZE);
             player[1] = new Player2(
-                    tiles, screenW / 4 * 3 / 64 * 64, screenW / 2 / 64 * 64);
+                    tiles,
+                    screenW / 4 * 3 / TILE_SIZE * TILE_SIZE,
+                    screenH / 2 / TILE_SIZE * TILE_SIZE);
             player[0]->changeView(screenW, screenH);
             player[1]->changeView(screenW, screenH);
             map.clearMap();
@@ -83,19 +99,20 @@ void display(int screenW, int screenH, string plNumber)
                         window.close();
                 if (Keyboard::isKeyPressed(Keyboard::Escape))
                     window.close();
-                if (Keyboard::isKeyPressed(Keyboard::R))
+                if (Keyboard::isKeyPressed(Keyboard::R)) {
                     break;
+                }
 
                 setParametrs(map, player, screenW, screenH);
 
-                window.setView(view);
+                window.setView(view[0]);
                 map.draw();
                 player[1]->draw();
                 player[0]->draw();
                 draw(screenW, screenH, player, 0);
                 //................
 
-                window.setView(viewP2);
+                window.setView(view[1]);
                 map.draw();
                 player[0]->draw();
                 player[1]->draw();
@@ -134,10 +151,8 @@ void setParametrs(Map& map, Player** player, int screenW, int screenH)
 }
 void draw(int screenW, int screenH, Player** player, int currentPlayer)
 {
-    screenW = 30;
-    screenH = 15;
-    Text scoreText("", font, DEFAULT_TEXT_SIZE),
-            bonusText("", font, DEFAULT_TEXT_SIZE);
+    Text scoreText("", font, screenW / 60 + TILE_SIZE / 4),
+            bonusText("", font, screenW / 60 + TILE_SIZE / 4);
     scoreText.setFillColor(Color(77, 64, 37));
     bonusText.setFillColor(Color(77, 64, 37));
 
@@ -145,19 +160,21 @@ void draw(int screenW, int screenH, Player** player, int currentPlayer)
     scoreStream << setfill('0') << setw(2) << player[currentPlayer]->getScore();
 
     scoreText.setString(L"Яблок собрано: " + scoreStream.str());
-    // scoreStream.str("");
-    scoreText.setPosition(view.getCenter().x - 406, view.getCenter().y - 470);
+
+    scoreText.setPosition(
+            view[currentPlayer].getCenter().x - screenW * 15 / 64 + TILE_SIZE,
+            view[currentPlayer].getCenter().y - screenH / 2 + TILE_SIZE);
     window.draw(scoreText);
     if (!player[1 - currentPlayer]->getLife()
         && !player[1 - currentPlayer]->getWinner()) {
         player[1 - currentPlayer]->getSprite().setColor(Color::Black);
-        bool winner = player[currentPlayer]->getWinner();
-        bool life = player[currentPlayer]->getLife();
-        winner = true;
-        life = false;
+        player[currentPlayer]->getWinner() = true;
+        player[currentPlayer]->getLife() = false;
     }
     if (player[currentPlayer]->getWinner()) {
-        gameWon.setPosition(view.getCenter().x - 440, view.getCenter().y - 256);
+        gameWon.setPosition(
+                view[currentPlayer].getCenter().x - screenW * 7 / 32,
+                view[currentPlayer].getCenter().y - screenH / 4);
         window.draw(gameWon);
     } else if (
             player[currentPlayer]->getLife()
@@ -165,13 +182,16 @@ void draw(int screenW, int screenH, Player** player, int currentPlayer)
         bonusStream << setfill('0') << setw(2)
                     << player[currentPlayer]->getBonusLeft();
         bonusText.setString(L"Действие бонуса: " + bonusStream.str());
-        // bonusStream.str("");
         bonusText.setPosition(
-                view.getCenter().x - 406, view.getCenter().y - 406);
+                view[currentPlayer].getCenter().x - screenW * 15 / 64
+                        + TILE_SIZE,
+                view[currentPlayer].getCenter().y - screenH / 2
+                        + 2 * TILE_SIZE);
         window.draw(bonusText);
     } else if (!player[currentPlayer]->getLife()) {
         gameOver.setPosition(
-                view.getCenter().x - 440, view.getCenter().y - 256);
+                view[currentPlayer].getCenter().x - screenW / 9 * 2,
+                view[currentPlayer].getCenter().y - screenH / 4);
         window.draw(gameOver);
     }
 }

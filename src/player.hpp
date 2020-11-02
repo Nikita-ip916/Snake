@@ -17,14 +17,14 @@ RenderWindow window;
 Font font;
 Text gameOver;
 Text gameWon;
-View view, viewP2;
+View view[2];
 const int HEIGHT_MAP = 32;
 const int WIDTH_MAP = 32;
 const int TILE_SIZE = 64;
 const int SEPARATOR_WIDTH = 12;
 const float MOVE_DELAY = 600;
 const int BONUS_TIME = 10;
-const int DEFAULT_TEXT_SIZE = 50;
+// const int DEFAULT_TEXT_SIZE = 50;
 
 struct Tile {
     string name;
@@ -36,10 +36,10 @@ struct Tile {
 class Object {
 protected:
     static Texture texture;
-    static Sprite sprite;
+    Sprite sprite;
 
 public:
-    static Sprite& getSprite();
+    Sprite& getSprite();
     static Texture& getTexture();
 };
 

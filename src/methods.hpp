@@ -14,7 +14,6 @@ using namespace sf;
 #define METHODS_HPP
 ////////////////////////////////////////////////////////////////// Statics
 Texture Object::texture;
-Sprite Object::sprite;
 ////////////////////////////////////////////////////////////////// Constructors
 Player::Player(Image& image, int x, int y, int w, int h)
     : w{w},
@@ -44,12 +43,12 @@ Player::Player(Image& image, int x, int y, int w, int h)
     sprite.setOrigin(w / 2, h / 2);
 }
 Player1::Player1(Image& image, int x, int y, int w, int h)
+    : Player(image, x, y, w, h)
 {
-    Player(image, x, y, w, h);
 }
 Player2::Player2(Image& image, int x, int y, int w, int h)
+    : Player(image, x, y, w, h)
 {
-    Player(image, x, y, w, h);
     sprite.setColor(Color::Magenta);
 }
 Map::Map(Image& image)
@@ -217,8 +216,8 @@ void Player::growth()
 void Player::checkCollisionWithMap(Map& map)
 {
     eaten = false;
-    int i = body[0].y / 64;
-    int j = body[0].x / 64;
+    int i = body[0].y / TILE_SIZE;
+    int j = body[0].x / TILE_SIZE;
     String* TileMap = map.getMap();
     if (TileMap[i][j] == '0') {
         life = false;
@@ -244,8 +243,8 @@ void Player::checkCollisionWithMap(Map& map)
 void Player::checkCollisionWithMap(Map& map, vector<Tile>& oppositeBody)
 {
     eaten = false;
-    int i = body[0].y / 64;
-    int j = body[0].x / 64;
+    int i = body[0].y / TILE_SIZE;
+    int j = body[0].x / TILE_SIZE;
     String* TileMap = map.getMap();
     if (TileMap[i][j] == '0') {
         life = false;
@@ -253,7 +252,7 @@ void Player::checkCollisionWithMap(Map& map, vector<Tile>& oppositeBody)
         speed = 2;
         bonusStart = true;
         TileMap[i][j] = ' ';
-        map.randomMapGenerate('+', body, oppositeBody, 1);
+        map.randomMapGenerate('+', body, oppositeBody);
     } else if (TileMap[i][j] == '-') {
         speed = 0.5;
         bonusStart = true;
@@ -264,8 +263,8 @@ void Player::checkCollisionWithMap(Map& map, vector<Tile>& oppositeBody)
         eaten = true;
         TileMap[i][j] = ' ';
         growth();
-        map.randomMapGenerate('a', body, oppositeBody, 1);
-        map.randomMapGenerate('-', body, oppositeBody, 1);
+        map.randomMapGenerate('a', body, oppositeBody);
+        map.randomMapGenerate('-', body, oppositeBody);
     }
 }
 //////////////////////////////////////////////////////////////// Body Collision
@@ -326,9 +325,11 @@ bool Player::update(Map& map, int screenW, int screenH)
         control();
     if (life && currentMoveDelay * speed > MOVE_DELAY) {
         checkCollisionWithMap(map);
-        checkCollisionWithBody();
     }
     bool isMoved = midUpdate(currentMoveDelay);
+    if (life && currentMoveDelay * speed > MOVE_DELAY) {
+        checkCollisionWithBody();
+    }
     setPlayerCoordinateForView(screenW, screenH);
     return isMoved;
 }
@@ -340,9 +341,11 @@ bool Player::update(
         control();
     if (life && currentMoveDelay * speed > MOVE_DELAY) {
         checkCollisionWithMap(map, oppositeBody);
-        checkCollisionWithBody(oppositeBody);
     }
     bool isMoved = midUpdate(currentMoveDelay);
+    if (life && currentMoveDelay * speed > MOVE_DELAY) {
+        checkCollisionWithBody(oppositeBody);
+    }
     setPlayerCoordinateForView(screenW, screenH);
     return isMoved;
 }
@@ -373,10 +376,11 @@ void Player::draw()
 {
     for (unsigned int i = 0; i < body.size(); i++) {
         if (body[i].name == "Head") {
-            sprite.setTextureRect(IntRect(0, 0, 64, 64));
+            sprite.setTextureRect(IntRect(0, 0, TILE_SIZE, TILE_SIZE));
         } else if (body[i].name == "Body") {
             if (body[i].state == body[i - 1].state) {
-                sprite.setTextureRect(IntRect(64, 0, 64, 64));
+                sprite.setTextureRect(
+                        IntRect(TILE_SIZE, 0, TILE_SIZE, TILE_SIZE));
             } else if (
                     (body[i].state == Tile::left
                      && body[i - 1].state == Tile::up)
@@ -386,12 +390,15 @@ void Player::draw()
                         && body[i - 1].state == Tile::down)
                     || (body[i].state == Tile::down
                         && body[i - 1].state == Tile::left)) {
-                sprite.setTextureRect(IntRect(192, 0, 64, 64));
+                sprite.setTextureRect(
+                        IntRect(TILE_SIZE * 3, 0, TILE_SIZE, TILE_SIZE));
             } else {
-                sprite.setTextureRect(IntRect(128, 0, 64, 64));
+                sprite.setTextureRect(
+                        IntRect(TILE_SIZE * 2, 0, TILE_SIZE, TILE_SIZE));
             }
         } else if (body[i].name == "Tail") {
-            sprite.setTextureRect(IntRect(256, 0, 64, 64));
+            sprite.setTextureRect(
+                    IntRect(TILE_SIZE * 4, 0, TILE_SIZE, TILE_SIZE));
         }
         switch (body[i].state) {
         case Tile::left:
@@ -414,10 +421,8 @@ void Player::draw()
 }
 void Player::draw(int screenW, int screenH)
 {
-    screenW = 30;
-    screenH = 15;
-    Text scoreText("", font, DEFAULT_TEXT_SIZE),
-            bonusText("", font, DEFAULT_TEXT_SIZE);
+    Text scoreText("", font, screenW / 80 + TILE_SIZE / 2),
+            bonusText("", font, screenW / 80 + TILE_SIZE / 2);
     scoreText.setFillColor(Color(77, 64, 37));
     bonusText.setFillColor(Color(77, 64, 37));
 
@@ -425,20 +430,22 @@ void Player::draw(int screenW, int screenH)
     scoreStream << setfill('0') << setw(2) << score;
 
     scoreText.setString(L"Яблок собрано: " + scoreStream.str());
-    // scoreStream.str("");
-    scoreText.setPosition(view.getCenter().x - 890, view.getCenter().y - 470);
+    scoreText.setPosition(
+            view[0].getCenter().x - screenW * 15 / 32 + TILE_SIZE,
+            view[0].getCenter().y - screenH / 2 + TILE_SIZE);
     window.draw(scoreText);
     if (life && bonusTime > 0) {
         bonusStream << setfill('0') << setw(2) << bonusLeft;
         bonusText.setString(L"Действие бонуса: " + bonusStream.str());
-        // bonusStream.str("");
         bonusText.setPosition(
-                view.getCenter().x - 890, view.getCenter().y - 406);
+                view[0].getCenter().x - screenW * 15 / 32 + TILE_SIZE,
+                view[0].getCenter().y - screenH / 2 + 2 * TILE_SIZE);
         window.draw(bonusText);
     } else if (!life) {
         sprite.setColor(Color::Black);
         gameOver.setPosition(
-                view.getCenter().x - 450, view.getCenter().y - 150);
+                view[0].getCenter().x - screenW / 4,
+                view[0].getCenter().y - screenH / 4);
         window.draw(gameOver);
     }
 }
@@ -447,21 +454,26 @@ void Map::draw()
     for (int i = 0; i < HEIGHT_MAP; i++)
         for (int j = 0; j < WIDTH_MAP; j++) {
             if (TileMap[i][j] == ' ') {
-                sprite.setTextureRect(IntRect(320, 0, 64, 64));
+                sprite.setTextureRect(
+                        IntRect(TILE_SIZE * 5, 0, TILE_SIZE, TILE_SIZE));
             }
             if (TileMap[i][j] == 'a') {
-                sprite.setTextureRect(IntRect(448, 0, 64, 64));
+                sprite.setTextureRect(
+                        IntRect(TILE_SIZE * 7, 0, TILE_SIZE, TILE_SIZE));
             }
             if (TileMap[i][j] == '0') {
-                sprite.setTextureRect(IntRect(384, 0, 64, 64));
+                sprite.setTextureRect(
+                        IntRect(TILE_SIZE * 6, 0, TILE_SIZE, TILE_SIZE));
             }
             if (TileMap[i][j] == '+') {
-                sprite.setTextureRect(IntRect(576, 0, 64, 64));
+                sprite.setTextureRect(
+                        IntRect(TILE_SIZE * 9, 0, TILE_SIZE, TILE_SIZE));
             }
             if (TileMap[i][j] == '-') {
-                sprite.setTextureRect(IntRect(512, 0, 64, 64));
+                sprite.setTextureRect(
+                        IntRect(TILE_SIZE * 8, 0, TILE_SIZE, TILE_SIZE));
             }
-            sprite.setPosition(j * 64, i * 64);
+            sprite.setPosition(j * TILE_SIZE, i * TILE_SIZE);
             window.draw(sprite);
         }
 }
@@ -485,11 +497,11 @@ void Player::setPlayerCoordinateForView(int screenW, int screenH)
 
     setTemps(tempX, tempY, halfW, halfH);
 
-    view.setCenter(
-            view.getCenter().x
-                    + (tempX - view.getCenter().x) / (halfW / 20 / speed),
-            view.getCenter().y
-                    + (tempY - view.getCenter().y) / (halfH / 20 / speed));
+    view[0].setCenter(
+            view[0].getCenter().x
+                    + (tempX - view[0].getCenter().x) / (halfW / 20 / speed),
+            view[0].getCenter().y
+                    + (tempY - view[0].getCenter().y) / (halfH / 20 / speed));
 }
 void Player1::setPlayerCoordinateForView(int screenW, int screenH)
 {
@@ -498,11 +510,11 @@ void Player1::setPlayerCoordinateForView(int screenW, int screenH)
 
     setTemps(tempX, tempY, halfW, halfH);
 
-    view.setCenter(
-            view.getCenter().x
-                    + (tempX - view.getCenter().x) / (halfW / 20 / speed),
-            view.getCenter().y
-                    + (tempY - view.getCenter().y) / (halfH / 20 / speed));
+    view[0].setCenter(
+            view[0].getCenter().x
+                    + (tempX - view[0].getCenter().x) / (halfW / 20 / speed),
+            view[0].getCenter().y
+                    + (tempY - view[0].getCenter().y) / (halfH / 20 / speed));
 }
 void Player2::setPlayerCoordinateForView(int screenW, int screenH)
 {
@@ -511,36 +523,36 @@ void Player2::setPlayerCoordinateForView(int screenW, int screenH)
 
     setTemps(tempX, tempY, halfW, halfH);
 
-    viewP2.setCenter(
-            viewP2.getCenter().x
-                    + (tempX - viewP2.getCenter().x) / (halfW / 20 / speed),
-            viewP2.getCenter().y
-                    + (tempY - viewP2.getCenter().y) / (halfH / 20 / speed));
+    view[1].setCenter(
+            view[1].getCenter().x
+                    + (tempX - view[1].getCenter().x) / (halfW / 20 / speed),
+            view[1].getCenter().y
+                    + (tempY - view[1].getCenter().y) / (halfH / 20 / speed));
 }
 
 void Player::changeView(int screenW, int screenH)
 {
-    view.setSize(screenW, screenH);
-    view.setViewport(FloatRect(0, 0, 1, 1));
-    view.setCenter(screenW / 2, screenH / 2);
-    viewP2.setSize(0, 0);
+    view[0].setSize(screenW, screenH);
+    view[0].setViewport(FloatRect(0, 0, 1, 1));
+    view[0].setCenter(screenW / 2, screenH / 2);
+    view[1].setSize(0, 0);
 }
 void Player1::changeView(int screenW, int screenH)
 {
-    view.setSize(screenW / 2 - SEPARATOR_WIDTH, screenH);
-    view.setViewport(
-            FloatRect(0, 0, (screenW / 2 - SEPARATOR_WIDTH) / screenW, 1));
-    view.setCenter(screenW / 4 - SEPARATOR_WIDTH / 2, screenH / 2);
+    view[0].setSize(screenW / 2 - SEPARATOR_WIDTH, screenH);
+    view[0].setViewport(FloatRect(
+            0, 0, float((screenW / 2 - SEPARATOR_WIDTH)) / float(screenW), 1));
+    view[0].setCenter(screenW / 4 - SEPARATOR_WIDTH / 2, screenH / 2);
 }
 void Player2::changeView(int screenW, int screenH)
 {
-    viewP2.setSize(screenW / 2 - SEPARATOR_WIDTH, screenH);
-    viewP2.setViewport(FloatRect(
-            1 - (screenW / 2 - SEPARATOR_WIDTH) / screenW,
+    view[1].setSize(screenW / 2 - SEPARATOR_WIDTH, screenH);
+    view[1].setViewport(FloatRect(
+            float(1 - float((screenW / 2 - SEPARATOR_WIDTH)) / float(screenW)),
             0,
-            (screenW / 2 - SEPARATOR_WIDTH) / screenW,
+            float((screenW / 2 - SEPARATOR_WIDTH)) / float(screenW),
             1));
-    viewP2.setCenter(screenW / 4 - SEPARATOR_WIDTH / 2, screenH / 2);
+    view[1].setCenter(screenW / 4 * 3 - SEPARATOR_WIDTH / 2, screenH / 2);
 }
 /////////////////////////////////////////////////////////// Random Map Generate
 void Map::randomMapGenerate(
@@ -552,8 +564,8 @@ void Map::randomMapGenerate(
         int randomElementX = 1 + rand() % (WIDTH_MAP - 1);
         int randomElementY = 1 + rand() % (HEIGHT_MAP - 1);
         for (unsigned int i = 0; i < playerBody.size(); i++) {
-            if (playerBody[i].x == randomElementX * 64
-                && playerBody[i].y == randomElementY * 64)
+            if (playerBody[i].x == randomElementX * TILE_SIZE
+                && playerBody[i].y == randomElementY * TILE_SIZE)
                 generate = false;
         }
         if (TileMap[randomElementY][randomElementX] == ' ' && generate) {
@@ -574,13 +586,13 @@ void Map::randomMapGenerate(
         int randomElementX = 1 + rand() % (WIDTH_MAP - 1);
         int randomElementY = 1 + rand() % (HEIGHT_MAP - 1);
         for (unsigned int i = 0; i < playerBody.size(); i++) {
-            if (playerBody[i].x == randomElementX * 64
-                && playerBody[i].y == randomElementY * 64)
+            if (playerBody[i].x == randomElementX * TILE_SIZE
+                && playerBody[i].y == randomElementY * TILE_SIZE)
                 generate = false;
         }
         for (unsigned int i = 0; i < oppositeBody.size(); i++) {
-            if (oppositeBody[i].x == randomElementX * 64
-                && oppositeBody[i].y == randomElementY * 64)
+            if (oppositeBody[i].x == randomElementX * TILE_SIZE
+                && oppositeBody[i].y == randomElementY * TILE_SIZE)
                 generate = false;
         }
         if (TileMap[randomElementY][randomElementX] == ' ' && generate) {
