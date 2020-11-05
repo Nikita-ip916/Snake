@@ -17,10 +17,11 @@ void setParametrs(Map&, Player&, int, int);
 void setParametrs(Map&, Player**, int, int);
 void draw(int, int, Player**, int);
 
-void display(int screenW, int screenH, string plNumber)
+void display()
 {
-    window.create(
-            VideoMode(screenW, screenH), "Snake 2020" /*, Style::Fullscreen*/);
+    string plNumber;
+    int screenW = 800, screenH = 600;
+    window.create(VideoMode(screenW, screenH), "Snake 2020");
     window.setVerticalSyncEnabled(true);
 
     Image tiles;
@@ -41,6 +42,181 @@ void display(int screenW, int screenH, string plNumber)
 
     while (window.isOpen()) {
         Map map(tiles);
+        Text* menuText = new Text[4];
+        Text* resolutionText = new Text[6];
+
+        menuText[0].setString(L"* Играть одному  ");
+        menuText[1].setString(L"* Играть с другом  ");
+        menuText[2].setString(L"* Разрешение экрана");
+        menuText[3].setString(L"* Выход            ");
+
+        resolutionText[0].setString(L"(800 x 600) SVGA");
+        resolutionText[1].setString(L"(1280 x 720) HD");
+        resolutionText[2].setString(L"(1600 x 900) WXGA++");
+        resolutionText[3].setString(L"(1920 x 1080) Full HD");
+        resolutionText[4].setString(L"Fullscreen    ---");
+        resolutionText[5].setString(L"Применить изменения");
+
+        Clock clockMenu;
+        bool resolutionMenu = false, fullscreen = false, tempFullscreen = false;
+        int activeMenu = 0, activeResolution = 0, chosen = 0;
+        int tempScreenW = screenW, tempScreenH = screenH;
+
+        window.setView(window.getDefaultView());
+
+        while (window.isOpen()) {
+            Event event;
+            while (window.pollEvent(event))
+                if (event.type == Event::Closed)
+                    window.close();
+
+            float currentMenuDelay
+                    = clockMenu.getElapsedTime().asMilliseconds();
+
+            for (int i = 0; i < 6; i++) {
+                if (i < 4) {
+                    menuText[i].setFont(font);
+                    menuText[i].setCharacterSize(screenW / 30 + TILE_SIZE / 4);
+                }
+                resolutionText[i].setFont(font);
+                resolutionText[i].setCharacterSize(
+                        screenW / 30 + TILE_SIZE / 4);
+            }
+
+            if (resolutionMenu) {
+                if ((Keyboard::isKeyPressed(Keyboard::Up)
+                     || Keyboard::isKeyPressed(Keyboard::W))
+                    && currentMenuDelay > MOVE_DELAY / 3) {
+                    if (activeResolution > 0) {
+                        activeResolution--;
+                    } else
+                        activeResolution = 5;
+                    clockMenu.restart();
+                } else if (
+                        (Keyboard::isKeyPressed(Keyboard::Down)
+                         || Keyboard::isKeyPressed(Keyboard::S))
+                        && currentMenuDelay > MOVE_DELAY / 3) {
+                    if (activeResolution < 5) {
+                        activeResolution++;
+                    } else
+                        activeResolution = 0;
+                    clockMenu.restart();
+                } else if (
+                        Keyboard::isKeyPressed(Keyboard::Return)
+                        && currentMenuDelay > MOVE_DELAY / 3) {
+                    if (activeResolution < 4) {
+                        chosen = activeResolution;
+                    }
+                    if (activeResolution == 0) {
+                        tempScreenW = 800;
+                        tempScreenH = 600;
+                    } else if (activeResolution == 1) {
+                        tempScreenW = 1280;
+                        tempScreenH = 720;
+                    } else if (activeResolution == 2) {
+                        tempScreenW = 1600;
+                        tempScreenH = 900;
+                    } else if (activeResolution == 3) {
+                        tempScreenW = 1920;
+                        tempScreenH = 1080;
+                    } else if (activeResolution == 4) {
+                        tempFullscreen = !tempFullscreen;
+                    } else if (activeResolution == 5) {
+                        if (screenW != tempScreenW || screenH != tempScreenH
+                            || fullscreen != tempFullscreen) {
+                            screenW = tempScreenW;
+                            screenH = tempScreenH;
+                            fullscreen = tempFullscreen;
+                            window.close();
+                            if (fullscreen) {
+                                window.create(
+                                        VideoMode(screenW, screenH),
+                                        "Snake 2020",
+                                        Style::Fullscreen);
+                            } else
+                                window.create(
+                                        VideoMode(screenW, screenH),
+                                        "Snake 2020");
+                        }
+                        resolutionMenu = false;
+                    }
+                    clockMenu.restart();
+                }
+            } else {
+                if ((Keyboard::isKeyPressed(Keyboard::Up)
+                     || Keyboard::isKeyPressed(Keyboard::W))
+                    && currentMenuDelay > MOVE_DELAY / 3) {
+                    if (activeMenu > 0) {
+                        activeMenu--;
+                    } else
+                        activeMenu = 3;
+                    clockMenu.restart();
+                } else if (
+                        (Keyboard::isKeyPressed(Keyboard::Down)
+                         || Keyboard::isKeyPressed(Keyboard::S))
+                        && currentMenuDelay > MOVE_DELAY / 3) {
+                    if (activeMenu < 3) {
+                        activeMenu++;
+                    } else
+                        activeMenu = 0;
+                    clockMenu.restart();
+                } else if (
+                        Keyboard::isKeyPressed(Keyboard::Return)
+                        && currentMenuDelay > MOVE_DELAY / 3) {
+                    if (activeMenu == 0) {
+                        plNumber = "1";
+                        break;
+                    } else if (activeMenu == 1) {
+                        plNumber = "2";
+                        break;
+                    } else if (activeMenu == 2) {
+                        resolutionMenu = true;
+                    } else if (activeMenu == 3) {
+                        window.close();
+                    }
+                    clockMenu.restart();
+                }
+            }
+            map.draw();
+            if (resolutionMenu) {
+                if (tempFullscreen) {
+                    resolutionText[4].setString(L"Fullscreen    +++");
+                } else {
+                    resolutionText[4].setString(L"Fullscreen    ---");
+                }
+                for (int i = 0; i < 6; i++) {
+                    resolutionText[i].setPosition(
+                            screenW / 4, screenH / 6 + i * screenH / 10);
+                    if (i == activeResolution) {
+                        resolutionText[i].setFillColor(Color::Red);
+                        resolutionText[i].setStyle(Text::Bold);
+                    } else {
+                        resolutionText[i].setFillColor(Color::White);
+                        resolutionText[i].setStyle(Text::Regular);
+                    }
+                    window.draw(resolutionText[i]);
+                }
+                resolutionText[chosen].setPosition(
+                        screenW / 4, screenH / 6 + 6 * screenH / 10);
+                resolutionText[chosen].setFillColor(Color::Green);
+                window.draw(resolutionText[chosen]);
+            } else {
+                for (int i = 0; i < 4; i++) {
+                    menuText[i].setPosition(
+                            screenW / 4, screenH / 6 + i * screenH / 10);
+                    if (i == activeMenu) {
+                        menuText[i].setFillColor(Color::Red);
+                        menuText[i].setStyle(Text::Bold);
+                    } else {
+                        menuText[i].setFillColor(Color::White);
+                        menuText[i].setStyle(Text::Regular);
+                    }
+                    window.draw(menuText[i]);
+                }
+            }
+
+            window.display();
+        }
         if (plNumber == "1") {
             Player player(
                     tiles,
@@ -56,16 +232,7 @@ void display(int screenW, int screenH, string plNumber)
                     if (event.type == Event::Closed)
                         window.close();
                 if (Keyboard::isKeyPressed(Keyboard::Escape))
-                    window.close();
-                if (Keyboard::isKeyPressed(Keyboard::R)) {
-                    /*screenW = 640;
-                    screenH = 480;
-                    window.close();
-                    window.create(
-                            VideoMode(screenW, screenH),
-                            "Snake 2020" , Style::Fullscreen);*/
                     break;
-                }
 
                 setParametrs(map, player, screenW, screenH);
 
@@ -98,10 +265,7 @@ void display(int screenW, int screenH, string plNumber)
                     if (event.type == Event::Closed)
                         window.close();
                 if (Keyboard::isKeyPressed(Keyboard::Escape))
-                    window.close();
-                if (Keyboard::isKeyPressed(Keyboard::R)) {
                     break;
-                }
 
                 setParametrs(map, player, screenW, screenH);
 

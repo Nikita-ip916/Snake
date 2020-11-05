@@ -7,7 +7,7 @@
 using namespace std;
 int main()
 {
-    string plNumber = "1";
+    /*string plNumber = "1";
     cout << "Введите кол-во игроков(1 или 2):\n";
     do {
         cin >> plNumber;
@@ -19,7 +19,7 @@ int main()
     } else if (plNumber == "two" || plNumber == "два") {
         plNumber = "2";
     }
-    int screenW = 1920, screenH = 1080;
-    display(screenW, screenH, plNumber);
+    int screenW = 1920, screenH = 1080;*/
+    display();
     return 0;
 }
