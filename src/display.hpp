@@ -17,6 +17,19 @@ void setParametrs(Map&, Player&, int, int);
 void setParametrs(Map&, Player**, int, int);
 void draw(int, int, Player**, int);
 
+bool checkResourse(const char* file)
+{
+    FILE* resourse;
+    resourse = fopen(file, "r");
+    if (resourse) {
+        fclose(resourse);
+        return true;
+    } else {
+        cout << "Error: " << file << " not found. Exit programm.\n";
+        return false;
+    }
+}
+
 void display()
 {
     string plNumber;
@@ -45,10 +58,10 @@ void display()
         Text* menuText = new Text[4];
         Text* resolutionText = new Text[6];
 
-        menuText[0].setString(L"* Играть одному  ");
-        menuText[1].setString(L"* Играть с другом  ");
-        menuText[2].setString(L"* Разрешение экрана");
-        menuText[3].setString(L"* Выход            ");
+        menuText[0].setString(L"* ИГРАТЬ ОДНОМУ");
+        menuText[1].setString(L"* ИГРАТЬ С ДРУГОМ");
+        menuText[2].setString(L"* РАЗРЕШЕНИЕ ЭКРАНА");
+        menuText[3].setString(L"* ВЫХОД");
 
         resolutionText[0].setString(L"(800 x 600) SVGA");
         resolutionText[1].setString(L"(1280 x 720) HD");
@@ -186,7 +199,7 @@ void display()
                 }
                 for (int i = 0; i < 6; i++) {
                     resolutionText[i].setPosition(
-                            screenW / 4, screenH / 6 + i * screenH / 10);
+                            screenW / 7 * 2, screenH / 6 + i * screenH / 10);
                     if (i == activeResolution) {
                         resolutionText[i].setFillColor(Color::Red);
                         resolutionText[i].setStyle(Text::Bold);
@@ -197,13 +210,13 @@ void display()
                     window.draw(resolutionText[i]);
                 }
                 resolutionText[chosen].setPosition(
-                        screenW / 4, screenH / 6 + 6 * screenH / 10);
+                        screenW / 7 * 2, screenH / 6 + 6 * screenH / 10);
                 resolutionText[chosen].setFillColor(Color::Green);
                 window.draw(resolutionText[chosen]);
             } else {
                 for (int i = 0; i < 4; i++) {
                     menuText[i].setPosition(
-                            screenW / 4, screenH / 6 + i * screenH / 10);
+                            screenW / 7 * 2, screenH / 6 + i * screenH / 10);
                     if (i == activeMenu) {
                         menuText[i].setFillColor(Color::Red);
                         menuText[i].setStyle(Text::Bold);
@@ -274,7 +287,6 @@ void display()
                 player[1]->draw();
                 player[0]->draw();
                 draw(screenW, screenH, player, 0);
-                //................
 
                 window.setView(view[1]);
                 map.draw();

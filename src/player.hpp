@@ -24,7 +24,6 @@ const int TILE_SIZE = 64;
 const int SEPARATOR_WIDTH = 12;
 const float MOVE_DELAY = 600;
 const int BONUS_TIME = 10;
-// const int DEFAULT_TEXT_SIZE = 50;
 
 struct Tile {
     string name;
@@ -68,10 +67,6 @@ protected:
     Clock clockMove, clockBonus;
     int w, h;
     bool bonusClockRemain;
-    // рабочие ostringstream bonus, score;
-    // рабочие Text bonusText, scoreText;
-    // рабочий float currentMoveDelay; +++
-    // рабочий int currentBonusTime; +++
     int bonusTime, bonusLeft;
     float speed;
     int score;
