@@ -24,6 +24,7 @@ const int TILE_SIZE = 64;
 const int SEPARATOR_WIDTH = 12;
 const float MOVE_DELAY = 600;
 const int BONUS_TIME = 10;
+const int WIN_SCORE = 5;
 
 struct Tile {
     string name;

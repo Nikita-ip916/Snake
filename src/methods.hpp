@@ -303,6 +303,10 @@ bool Player::update(
         Map& map, vector<Tile>& oppositeBody, int screenW, int screenH)
 {
     float currentMoveDelay = clockMove.getElapsedTime().asMilliseconds();
+    if (score >= WIN_SCORE) {
+        winner = true;
+        life = false;
+    }
     if (life)
         control();
     if (life && currentMoveDelay * speed > MOVE_DELAY) {
@@ -412,6 +416,8 @@ void Player::draw(int screenW, int screenH)
         gameOver.setPosition(
                 view[0].getCenter().x - screenW / 4,
                 view[0].getCenter().y - screenH / 4);
+        gameOver.setString(L"    Игра\nокончена");
+        gameOver.setCharacterSize(screenW / 10 + TILE_SIZE / 4);
         window.draw(gameOver);
     }
 }
@@ -518,7 +524,7 @@ void Player2::changeView(int screenW, int screenH)
             0,
             float((screenW / 2 - SEPARATOR_WIDTH)) / float(screenW),
             1));
-    view[1].setCenter(screenW / 4 * 3 - SEPARATOR_WIDTH / 2, screenH / 2);
+    view[1].setCenter(screenW / 4 - SEPARATOR_WIDTH / 2, screenH / 4 * 5);
 }
 /////////////////////////////////////////////////////////// Random Map Generate
 void Map::randomMapGenerate(
