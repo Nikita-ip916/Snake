@@ -59,6 +59,7 @@ void display()
     Map map(tiles);
     Text* menuText = new Text[4];
     Text* resolutionText = new Text[6];
+    Text* roundsText = new Text[5];
 
     menuText[0].setString(L"* ИГРАТЬ ОДНОМУ");
     menuText[1].setString(L"* ИГРАТЬ С ДРУГОМ");
@@ -72,14 +73,28 @@ void display()
     resolutionText[4].setString(L"Fullscreen    ---");
     resolutionText[5].setString(L"Применить изменения");
 
+    roundsText[0].setString(L"Играть до:");
+    roundsText[1].setString(L"* 1 победы");
+    roundsText[2].setString(L"* 3 побед");
+    roundsText[3].setString(L"* 5 побед");
+    roundsText[4].setString(L"* 7 побед");
+
     Clock clockMenu;
-    bool resolutionMenu = false, fullscreen = false, tempFullscreen = false;
-    int activeMenu = 0, activeResolution, currentResolution = 3, chosen;
+
+    bool roundsMenu = false;
+    int activeRounds = 1;
+
+    bool resolutionMenu = false, fullscreen = false;
+    bool tempFullscreen = fullscreen;
+    int activeResolution, currentResolution = 3, chosen;
+    activeResolution = chosen = currentResolution;
     int tempScreenW = screenW, tempScreenH = screenH;
 
-    activeResolution = chosen = currentResolution;
+    int activeMenu = 0;
 
     while (window.isOpen()) {
+        // drawMenu(bool &fullscreen, int&currentResolution);
+
         while (window.isOpen()) {
             while (window.pollEvent(event))
                 if (event.type == Event::Closed)
@@ -93,6 +108,11 @@ void display()
                     menuText[i].setFont(font);
                     menuText[i].setCharacterSize(screenW / 30 + TILE_SIZE / 4);
                 }
+                if (i < 5) {
+                    roundsText[i].setFont(font);
+                    roundsText[i].setCharacterSize(
+                            screenW / 30 + TILE_SIZE / 4);
+                }
                 resolutionText[i].setFont(font);
                 resolutionText[i].setCharacterSize(
                         screenW / 30 + TILE_SIZE / 4);
@@ -100,8 +120,46 @@ void display()
 
             map.clearMap();
             window.setView(window.getDefaultView());
-
-            if (resolutionMenu) {
+            if (roundsMenu) {
+                if (Keyboard::isKeyPressed(Keyboard::Escape)
+                    && currentMenuDelay > MOVE_DELAY / 3) {
+                    roundsMenu = false;
+                } else if (
+                        (Keyboard::isKeyPressed(Keyboard::Up)
+                         || Keyboard::isKeyPressed(Keyboard::W))
+                        && currentMenuDelay > MOVE_DELAY / 3) {
+                    if (activeRounds > 1) {
+                        activeRounds--;
+                    } else
+                        activeRounds = 4;
+                    clockMenu.restart();
+                } else if (
+                        (Keyboard::isKeyPressed(Keyboard::Down)
+                         || Keyboard::isKeyPressed(Keyboard::S))
+                        && currentMenuDelay > MOVE_DELAY / 3) {
+                    if (activeRounds < 4) {
+                        activeRounds++;
+                    } else
+                        activeRounds = 1;
+                    clockMenu.restart();
+                } else if (
+                        Keyboard::isKeyPressed(Keyboard::Return)
+                        && currentMenuDelay > MOVE_DELAY / 3) {
+                    if (activeRounds == 1) {
+                        wins[2] = 1;
+                    } else if (activeRounds == 2) {
+                        wins[2] = 3;
+                    } else if (activeRounds == 3) {
+                        wins[2] = 5;
+                    } else if (activeRounds == 4) {
+                        wins[2] = 7;
+                    }
+                    roundsMenu = false;
+                    plNumber = "2";
+                    break;
+                    clockMenu.restart();
+                }
+            } else if (resolutionMenu) {
                 if (Keyboard::isKeyPressed(Keyboard::Escape)
                     && currentMenuDelay > MOVE_DELAY / 3) {
                     activeResolution = chosen = currentResolution;
@@ -191,8 +249,7 @@ void display()
                         plNumber = "1";
                         break;
                     } else if (activeMenu == 1) {
-                        plNumber = "2";
-                        break;
+                        roundsMenu = true;
                     } else if (activeMenu == 2) {
                         resolutionMenu = true;
                     } else if (activeMenu == 3) {
@@ -202,7 +259,20 @@ void display()
                 }
             }
             map.draw();
-            if (resolutionMenu) {
+            if (roundsMenu) {
+                for (int i = 0; i < 5; i++) {
+                    roundsText[i].setPosition(
+                            screenW / 7 * 2, screenH / 6 + i * screenH / 10);
+                    if (i == activeRounds) {
+                        roundsText[i].setFillColor(Color::Red);
+                        roundsText[i].setStyle(Text::Bold);
+                    } else {
+                        roundsText[i].setFillColor(Color::White);
+                        roundsText[i].setStyle(Text::Regular);
+                    }
+                    window.draw(roundsText[i]);
+                }
+            } else if (resolutionMenu) {
                 if (tempFullscreen) {
                     resolutionText[4].setString(L"Fullscreen    +++");
                 } else {
