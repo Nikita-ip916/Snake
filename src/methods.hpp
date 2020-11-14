@@ -132,6 +132,29 @@ String* Map::getMap()
 ////////////////////////////////////////////////////////////////////// Controls
 void Player::control()
 {
+    if ((Keyboard::isKeyPressed(Keyboard::A)
+         || Keyboard::isKeyPressed(Keyboard::Left))
+        && body[body.size() - 1].state != Tile::right) {
+        body[0].state = Tile::left;
+    } else if (
+            (Keyboard::isKeyPressed(Keyboard::D)
+             || Keyboard::isKeyPressed(Keyboard::Right))
+            && body[body.size() - 1].state != Tile::left) {
+        body[0].state = Tile::right;
+    } else if (
+            (Keyboard::isKeyPressed(Keyboard::W)
+             || Keyboard::isKeyPressed(Keyboard::Up))
+            && body[body.size() - 1].state != Tile::down) {
+        body[0].state = Tile::up;
+    } else if (
+            (Keyboard::isKeyPressed(Keyboard::S)
+             || Keyboard::isKeyPressed(Keyboard::Down))
+            && body[body.size() - 1].state != Tile::up) {
+        body[0].state = Tile::down;
+    }
+}
+void Player1::control()
+{
     if (Keyboard::isKeyPressed(Keyboard::A)
         && body[body.size() - 1].state != Tile::right) {
         body[0].state = Tile::left;
@@ -418,6 +441,80 @@ void Player::draw(int screenW, int screenH)
                 view[0].getCenter().y - screenH / 4);
         gameOver.setString(L"    Игра\nокончена");
         gameOver.setCharacterSize(screenW / 10 + TILE_SIZE / 4);
+        window.draw(gameOver);
+    }
+}
+void Player::draw(
+        int screenW,
+        int screenH,
+        Player* opposite,
+        int* wins,
+        int currentPlayer)
+{
+    Text winsText("", font, screenW / 50 + TILE_SIZE / 5),
+            scoreText("", font, screenW / 50 + TILE_SIZE / 5),
+            bonusText("", font, screenW / 50 + TILE_SIZE / 5);
+    winsText.setFillColor(Color(77, 64, 37));
+    scoreText.setFillColor(Color(77, 64, 37));
+    bonusText.setFillColor(Color(77, 64, 37));
+
+    ostringstream winsStream, totWinsStream, scoreStream, bonusStream;
+
+    winsStream << setw(1) << wins[currentPlayer];
+    totWinsStream << setw(1) << wins[2];
+    scoreStream << setfill('0') << setw(2) << score;
+
+    scoreText.setString(L"Яблок собрано: " + scoreStream.str());
+    winsText.setString(
+            L"Побед в раундах: " + winsStream.str() + L" из "
+            + totWinsStream.str());
+
+    winsText.setPosition(
+            view[currentPlayer].getCenter().x - screenW * 15 / 64 + TILE_SIZE,
+            view[currentPlayer].getCenter().y - screenH / 2 + TILE_SIZE);
+    window.draw(winsText);
+
+    scoreText.setPosition(
+            view[currentPlayer].getCenter().x - screenW * 15 / 64 + TILE_SIZE,
+            view[currentPlayer].getCenter().y - screenH / 2 + 2 * TILE_SIZE);
+    window.draw(scoreText);
+
+    if (!opposite->getLife() && !opposite->getWinner()) {
+        opposite->getSprite().setColor(Color::Black);
+        winner = true;
+        life = false;
+    }
+    if (winner) {
+        opposite->getLife() = false;
+        gameWon.setPosition(
+                view[currentPlayer].getCenter().x - screenW / 7,
+                view[currentPlayer].getCenter().y - screenH / 9 * 2);
+        gameWon.setCharacterSize(screenW / 20 + TILE_SIZE / 4);
+        if (wins[currentPlayer] >= wins[2]) {
+            gameWon.setString(L"      Вы\nпобедили");
+        } else {
+            gameWon.setString(L"  Раунд\nвыигран\n (Enter)");
+        }
+        window.draw(gameWon);
+    } else if (life && bonusTime > 0) {
+        bonusStream << setfill('0') << setw(2) << bonusLeft;
+        bonusText.setString(L"Действие бонуса: " + bonusStream.str());
+        bonusText.setPosition(
+                view[currentPlayer].getCenter().x - screenW * 15 / 64
+                        + TILE_SIZE,
+                view[currentPlayer].getCenter().y - screenH / 2
+                        + 3 * TILE_SIZE);
+        window.draw(bonusText);
+    } else if (!life) {
+        gameOver.setPosition(
+                view[currentPlayer].getCenter().x - screenW / 7,
+                view[currentPlayer].getCenter().y - screenH / 9 * 2);
+        gameOver.setCharacterSize(screenW / 20 + TILE_SIZE / 4);
+        if (wins[1 - currentPlayer] >= wins[2]) {
+            gameOver.setString(L"    Игра\nокончена");
+        } else {
+            gameOver.setString(L"  Раунд\nпроигран\n (Enter)");
+        }
         window.draw(gameOver);
     }
 }

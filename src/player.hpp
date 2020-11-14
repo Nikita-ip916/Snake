@@ -110,11 +110,18 @@ public:
 
     void draw();
     void draw(int screenW, int screenH);
+    void
+    draw(int screenW,
+         int screenH,
+         Player* opposite,
+         int* wins,
+         int currentPlayer);
 };
 
 class Player1 : public Player {
 public:
     Player1(Image& image, int x, int y, int w = TILE_SIZE, int h = TILE_SIZE);
+    virtual void control();
     virtual void changeView(int screenW, int screenH);
     virtual void setPlayerCoordinateForView(int screenW, int screenH);
 };
