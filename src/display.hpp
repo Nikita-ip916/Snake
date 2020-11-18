@@ -15,8 +15,6 @@ using namespace sf;
 #ifndef DISPLAY_HPP
 #define DISPLAY_HPP
 
-void draw(int, int, Player**, int*, int);
-
 void display()
 {
     string plNumber;
